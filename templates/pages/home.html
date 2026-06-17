@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Home | Nurtured Story{% endblock %}
+
+{% block content %}
+
+<section class="page-intro home-intro" data-cosmic-anchor="home-title">
+  <h1>Nurtured Story</h1>
+  <p class="lede">Relational and Sex Counseling</p>
+</section>
+
+<section class="home-layout">
+  <aside class="home-profile-column">
+    <article class="photo-card section-card" data-cosmic-anchor="profile-photo">
+      <div role="img" aria-label="Therapist photo placeholder">
+        <!-- image present in static folder shel-image.avif -->
+         <img src="{% static 'shel-image.avif' %}" alt="Photo of Shel, a therapist" class="profile-photo" />
+      </div>
+    </article>
+    <div class="connector-orbit" aria-hidden="true"></div>
+  </aside>
+
+  <div class="home-text-column">
+    <article class="section-card info-card info-card-purple" data-cosmic-anchor="about-practice">
+      <h2 class="section-header">About the Practice</h2>
+      <p>
+        Nurtured Story is a relational and sex counseling practice dedicated to creating a warm,
+        affirming space where individuals and couples can explore intimacy, identity, and connection.
+        Our approach honors the complexity of human relationships through a narrative lens — believing that
+        the stories we hold about ourselves shape how we love.
+      </p>
+      <p>
+        We specialize in working with LGBTQ+ individuals, non-monogamous relationships, and anyone
+        seeking compassionate, kink-aware, and sex-positive care.
+      </p>
+    </article>
+
+    <article class="section-card info-card info-card-teal" data-cosmic-anchor="about-me">
+      <h2 class="section-header">About Me</h2>
+      <p>
+        I'm Shel, a Licensed Associate Professional Counselor (LAPC) holding an MA from Agnes Scott College.
+        My work is grounded in narrative therapy, attachment theory, and a deep respect for the diversity
+        of human experience.
+      </p>
+      <p>
+        I come to this work with curiosity, warmth, and a commitment to justice. Whether you're navigating
+        relationship transitions, exploring your identity, or seeking to reconnect with yourself and others,
+        I am here to walk alongside you in your story.
+      </p>
+    </article>
+  </div>
+</section>
+{% endblock %}

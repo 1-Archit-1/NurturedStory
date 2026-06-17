@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}Resources | Nurtured Story{% endblock %}
+
+{% block content %}
+<section class="page-intro" data-cosmic-anchor="resources-title">
+  <h1>Resources</h1>
+  <p class="lede">Click a card to explore</p>
+</section>
+
+<section class="resource-grid">
+  {% for resource in resources %}
+    <button class="section-card resource-card resource-open" type="button" data-resource-index="{{ forloop.counter0 }}" data-cosmic-anchor="resource-{{ resource.id }}" tabindex="0">
+      <div class="resource-emoji">{{ resource.emoji }}</div>
+      <h2 class="resource-title">{{ resource.title }}</h2>
+      <p class="tagline">{{ resource.tagline }}</p>
+      <p class="resource-cta">Learn more →</p>
+    </button>
+  {% endfor %}
+</section>
+
+<div class="resource-modal hidden" id="resource-modal" aria-hidden="true">
+  <div class="resource-modal-backdrop" data-close-modal="true"></div>
+  <article class="section-card resource-modal-card" role="dialog" aria-modal="true" aria-labelledby="resource-modal-title">
+    <button class="modal-close" type="button" id="resource-close" aria-label="Close">×</button>
+    <p id="resource-modal-emoji" class="resource-modal-emoji"></p>
+    <h2 id="resource-modal-title"></h2>
+    <p id="resource-modal-intro" class="tagline"></p>
+    <div id="resource-modal-items" class="resource-modal-items"></div>
+  </article>
+</div>
+
+{{ resources|json_script:"resource-data" }}
+{% endblock %}
+
+{% block page_scripts %}
+  <script>
+    (() => {
+      const dataEl = document.getElementById("resource-data");
+      const modal = document.getElementById("resource-modal");
+      if (!dataEl || !modal) return;
+
+      const resources = JSON.parse(dataEl.textContent);
+      const buttons = document.querySelectorAll(".resource-open");
+      const closeButton = document.getElementById("resource-close");
+      const titleEl = document.getElementById("resource-modal-title");
+      const emojiEl = document.getElementById("resource-modal-emoji");
+      const introEl = document.getElementById("resource-modal-intro");
+      const itemsEl = document.getElementById("resource-modal-items");
+
+      const openModal = (resource) => {
+        titleEl.textContent = resource.title;
+        emojiEl.textContent = resource.emoji;
+        introEl.textContent = resource.intro;
+        itemsEl.innerHTML = "";
+
+        resource.items.forEach((item) => {
+          const section = document.createElement("section");
+          section.className = "resource-item";
+
+          const heading = document.createElement("h3");
+          heading.textContent = item.heading;
+
+          const description = document.createElement("p");
+          description.textContent = item.description;
+
+          section.appendChild(heading);
+          section.appendChild(description);
+          itemsEl.appendChild(section);
+        });
+
+        modal.classList.remove("hidden");
+        modal.setAttribute("aria-hidden", "false");
+        document.body.classList.add("modal-open");
+      };
+
+      const closeModal = () => {
+        modal.classList.add("hidden");
+        modal.setAttribute("aria-hidden", "true");
+        document.body.classList.remove("modal-open");
+      };
+
+      buttons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const index = Number(btn.getAttribute("data-resource-index"));
+          if (Number.isNaN(index) || !resources[index]) return;
+          openModal(resources[index]);
+        });
+      });
+
+      closeButton?.addEventListener("click", closeModal);
+
+      modal.addEventListener("click", (event) => {
+        const target = event.target;
+        if (target instanceof HTMLElement && target.dataset.closeModal === "true") {
+          closeModal();
+        }
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && !modal.classList.contains("hidden")) {
+          closeModal();
+        }
+      });
+    })();
+  </script>
+{% endblock %}

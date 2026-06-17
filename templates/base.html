@@ -1,0 +1,32 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Nurtured Story{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/site.css' %}" />
+  </head>
+  <body>
+    <div class="cosmic-scene" id="cosmic-scene" aria-hidden="true">
+      <div class="cosmic-sun-arc"></div>
+      <div class="cosmic-stars" id="cosmic-stars"></div>
+      <svg class="cosmic-constellations" id="cosmic-constellations" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+      <div class="cosmic-planets" id="cosmic-planets"></div>
+    </div>
+
+    {% include 'partials/header.html' %}
+    <main class="container page-content">
+      {% block content %}{% endblock %}
+    </main>
+    <footer class="site-footer">
+      <p>Copyright 2026 Nurtured Story | shel@nurturedstory.com | 470-599-5630</p>
+      <p class="subtitle">Relational and Sex Counseling</p>
+    </footer>
+    {{ cosmic_scene|default:''|json_script:"cosmic-scene-config" }}
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.x/tsparticles.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tsparticles/plugin-manual-particles@4/tsparticles.plugin.manualParticles.min.js" defer></script>
+    <script src="{% static 'js/cosmic_scene.js' %}" defer></script>
+    {% block page_scripts %}{% endblock %}
+  </body>
+</html>
