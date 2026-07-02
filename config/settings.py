@@ -1,4 +1,9 @@
 from pathlib import Path
+import os
+
+DEBUG = os.environ.get('RENDER', 'False') == 'False'
+
+ALLOWED_HOSTS = ['nurturedStory.onrender.com']
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 

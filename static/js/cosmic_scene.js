@@ -35,47 +35,33 @@
             }
 
             const size = Number(planet.size) || 72;
+            const mobileFactor = window.innerWidth <= 860 ? 0.5 : 1;
+            const scaledSize = Math.round(size * mobileFactor);
             const t = (index + 1) / (planets.length + 1);
 
             // 1. THE INWARD CURVE
-            // Starts top-left (20%), swoops INWARD toward the left margin 
-            // in the middle of the screen, and arcs out to the bottom-right (85%).
-            const basePathX = 20 + (t * 60) - (Math.sin(t * Math.PI) * 28);
-            
-            // Strictly distribute them from 5% to 95% of the screen height.
+            const basePathX = 20 + (t * 60) - (Math.sin(t * Math.PI) * 26);
             const basePathY = 8 + (t * 84);
 
             // 2. THE ANTI-COLLISION STAGGER
-            // Instead of randomizing the X axis, we deliberately alternate the planets 
-            // left and right of the invisible curve by 12%. This guarantees that 
-            // massive planets (like Jupiter and Saturn) never touch.
             const staggerX = (index % 2 === 0 ? -1 : 1) * 12; 
-            
-            // Keep the vertical randomness extremely tiny (just 4%) so they look 
-            // slightly organic without destroying our strict vertical spacing.
             const scatterY = (seedValue(90 + index) - 0.5) * 4;
 
-            // Calculate final coordinates, keeping them within the screen bounds
             const pathX = clamp(basePathX + staggerX, 5, 95);
             const pathY = clamp(basePathY + scatterY, 5, 95);
-
 
             const anchorEl = planet.anchor ? document.querySelector(`[data-cosmic-anchor="${planet.anchor}"]`) : null;
             const anchorRect = anchorEl ? anchorEl.getBoundingClientRect() : null;
             const anchorX = anchorRect ? ((anchorRect.left + anchorRect.width / 2) / window.innerWidth) * 100 : null;
             const anchorY = anchorRect ? ((anchorRect.top + anchorRect.height / 2) / window.innerHeight) * 100 : null;
             
-            // FIX 2: Reduce the anchor "pull" from 55% to 15%. 
-            // This keeps planets in the background margins, but allows them to hover/interact safely.
             const x = clamp(anchorX !== null ? pathX * 0.95 + anchorX * 0.05 : pathX, 5, 95);
             const y = clamp(anchorY !== null ? pathY * 0.95 + anchorY * 0.05 : pathY, 5, 95);
 
             planetEl.style.left = `${x}%`;
             planetEl.style.top = `${y}%`;
-            planetEl.style.width = `${size}px`;
-            planetEl.style.height = `${size}px`;
-            planetEl.style.setProperty("--planet-drift-x", `${(seedValue(120 + index) - 0.5) * 5}px`);
-            planetEl.style.setProperty("--planet-drift-y", `${(seedValue(130 + index) - 0.5) * 8}px`);
+            planetEl.style.width = `${scaledSize}px`;
+            planetEl.style.height = `${scaledSize}px`;
             planetEl.style.setProperty("--planet-delay", `${seedValue(140 + index) * 4}s`);
 
             if (planet.ring) {
@@ -104,49 +90,52 @@
             planetsHost.appendChild(planetEl);
         });
     };
-
     const drawConstellations = () => {
         constellationHost.innerHTML = "";
         
-        // FIX 1: Create a master SVG wrapper so coordinates act as fluid percentages
-        const svgWrapper = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        svgWrapper.setAttribute("viewBox", "0 0 100 100");
-        svgWrapper.setAttribute("preserveAspectRatio", "xMidYMid slice");
-        svgWrapper.style.width = "100%";
-        svgWrapper.style.height = "100%";
-        svgWrapper.style.position = "absolute";
-        svgWrapper.style.inset = "0";
-
-        // FIX 2: More organic, spread-out coordinates for a realistic star map look
-        const organicPoints = {
-            // Shifted to the top-right empty space
+        // Local coordinates for perfect squares
+        const localPoints = {
             "big_dipper": [
-                {x: 62, y: 8}, {x: 68, y: 14}, {x: 75, y: 20}, {x: 70, y: 26}, 
-                {x: 82, y: 30}, {x: 90, y: 22}, {x: 86, y: 12}
+                {x: 5, y: 20}, {x: 25, y: 35}, {x: 50, y: 45}, {x: 40, y: 65},
+                {x: 75, y: 80}, {x: 95, y: 50}, {x: 80, y: 25}
             ],
-            // Shifted entirely into the far-left margin
             "orion": [
-                {x: 7, y: 28}, {x: 19, y: 30}, {x: 11, y: 45}, {x: 15, y: 46}, 
-                {x: 19, y: 44}, {x: 7, y: 68}, {x: 23, y: 64}, {x: 13, y: 15}
+                {x: 10, y: 15}, {x: 35, y: 20}, {x: 20, y: 50}, {x: 30, y: 55},
+                {x: 40, y: 50}, {x: 10, y: 95}, {x: 55, y: 90}, {x: 25, y: 5}
             ],
-            // Shifted to the bottom-right corner
             "gemini": [
-                {x: 75, y: 70}, {x: 85, y: 75}, {x: 72, y: 85}, {x: 82, y: 87}, 
-                {x: 68, y: 97}, {x: 80, y: 100}, {x: 88, y: 93}, {x: 80, y: 60}
+                {x: 20, y: 10}, {x: 50, y: 25}, {x: 10, y: 60}, {x: 40, y: 65},
+                {x: 5, y: 95}, {x: 30, y: 100}, {x: 60, y: 80}, {x: 40, y: 5}
             ]
         };
 
         const constellations = Array.isArray(config.constellations) ? config.constellations : [];
 
-        constellations.forEach((constellation) => {
-            const points = organicPoints[constellation.id] || constellation.points;
-            if (!points || points.length < 2) return;
-            const randomDelay = Math.random() * 4; // Between 0s and 4s delay
+        constellations.forEach((constellation, index) => {
+            const points = localPoints[constellation.id] || [];
+            if (points.length < 2) return;
+
+            // Distribute down the page safely
+            const t = (index + 1) / (constellations.length + 1);
+            const topPercent = 15 + (t * 70); 
+            const leftPercent = index % 2 === 0 ? 20 : 80;
+
+            const groupWrapper = document.createElement("div");
+            groupWrapper.className = "constellation-group";
+            groupWrapper.dataset.constellation = constellation.id || "";
             
-            const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
-            group.setAttribute("class", "constellation-group");
-            group.setAttribute("data-constellation", constellation.id || "");
-            group.style.animationDelay = `${randomDelay}s`;
+            groupWrapper.style.left = `${leftPercent}%`;
+            groupWrapper.style.top = `${topPercent}%`;
+
+            const randomDelay = Math.random() * 4;
+            groupWrapper.style.animationDelay = `${randomDelay}s`;
+
+            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg.setAttribute("viewBox", "0 0 100 100");
+            svg.style.width = "100%";
+            svg.style.height = "100%";
+            svg.style.overflow = "visible"; 
+
             const linePairs =
                 constellation.id === "orion"
                     ? [[0, 1], [0, 2], [1, 4], [2, 3], [3, 4], [2, 5], [4, 6], [0, 7], [1, 7]]
@@ -165,30 +154,29 @@
                 line.setAttribute("x2", `${to.x}`);
                 line.setAttribute("y2", `${to.y}`);
                 line.setAttribute("class", "constellation-line");
-                line.setAttribute("style", `stroke: ${constellation.color || "rgba(180, 210, 255, 0.4)"}; stroke-dasharray: 0.5 1.5;`);                
-                group.appendChild(line);
+                line.setAttribute("style", `stroke: ${constellation.color || "rgba(180, 210, 255, 0.4)"}; stroke-dasharray: 2 4;`);
+                svg.appendChild(line);
             });
 
-            points.forEach((point, index) => {
+            points.forEach((point, i) => {
                 const star = document.createElementNS("http://www.w3.org/2000/svg", "circle");
                 star.setAttribute("cx", `${point.x}`);
                 star.setAttribute("cy", `${point.y}`);
-                star.setAttribute("r", index === 0 ? "0.5" : "0.3");
+                star.setAttribute("r", i === 0 ? "2" : "1.2");
                 star.setAttribute("class", "constellation-star");
-                group.appendChild(star);
+                svg.appendChild(star);
             });
 
             const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            label.setAttribute("x", `${points[0].x + 2}`);
-            label.setAttribute("y", `${points[0].y + 4}`);
+            label.setAttribute("x", `${points[0].x + 5}`);
+            label.setAttribute("y", `${points[0].y + 7}`);
             label.setAttribute("class", "constellation-label");
-            label.textContent = (constellation.label || "").toUpperCase(); 
-            group.appendChild(label);
+            label.textContent = (constellation.label || "").toUpperCase();
+            svg.appendChild(label);
 
-            svgWrapper.appendChild(group);
+            groupWrapper.appendChild(svg);
+            constellationHost.appendChild(groupWrapper);
         });
-        
-        constellationHost.appendChild(svgWrapper);
     };
 
     const loadScene = async () => {
@@ -204,8 +192,8 @@
                 fpsLimit: 60,
                 particles: {
                     number: {
-                        value: Number(config.stars) || 300,
-                        density: { enable: true, width: 1920, height: 1080 }, // Spreads them evenly
+                        value: Number(config.stars) || 420,
+                        density: { enable: true, width: 1920, height: 1080 },
                     },
                     color: { value: ["#ffffff", "#dbe6ff", "#c8b8e8"] },
                     move: {
@@ -220,7 +208,7 @@
                         animation: { enable: true, speed: 0.5, sync: false },
                     },
                     shape: { type: "circle" },
-                    size: { value: { min: 1, max: 3.5 } }, // Big enough to see
+                    size: { value: { min: 0.4, max: 1.4 } },
                 },
                 background: {
                     color: { value: "transparent" },
@@ -228,23 +216,35 @@
             },
         });
     };
-        // --- HIGH-PERFORMANCE PARALLAX ENGINE ---
     const initParallax = () => {
         const allPlanets = document.querySelectorAll('.cosmic-planet');
-        if (allPlanets.length === 0) return; // Safety check
+        const allConstellations = document.querySelectorAll('.constellation-group');
 
-        function updateParallax() {
+        let ticking = false;
+
+        const applyParallax = () => {
             const scrollY = window.scrollY;
-            allPlanets.forEach(planet => {
-                if (!planet) return; // Extra defensive check
-                const size = parseFloat(planet.style.width) || 70;
-                const speed = (size / 150) * 0.35; 
-                const yMovement = scrollY * -speed;
-                planet.style.setProperty('--parallax-y', `${yMovement}px`);
-            });
-        }
 
-        window.addEventListener('scroll', updateParallax, { passive: true });
+            allPlanets.forEach(planet => {
+                if (!planet) return;
+                const size = parseFloat(planet.style.width) || 70;
+                const speed = (size / 150) * 0.35;
+                planet.style.setProperty('--parallax-y', `${scrollY * -speed}px`);
+            });
+
+            allConstellations.forEach(constellation => {
+                constellation.style.setProperty('--parallax-y', `${scrollY * -0.12}px`);
+            });
+
+            ticking = false;
+        };
+
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                requestAnimationFrame(applyParallax);
+                ticking = true;
+            }
+        }, { passive: true });
     };
     const render = () => {
         drawPlanets();

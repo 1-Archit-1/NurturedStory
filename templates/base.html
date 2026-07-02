@@ -11,7 +11,7 @@
     <div class="cosmic-scene" id="cosmic-scene" aria-hidden="true">
       <div class="cosmic-sun-arc"></div>
       <div class="cosmic-stars" id="cosmic-stars"></div>
-      <svg class="cosmic-constellations" id="cosmic-constellations" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+      <div class="cosmic-constellations" id="cosmic-constellations"></div>
       <div class="cosmic-planets" id="cosmic-planets"></div>
     </div>
 
@@ -20,7 +20,7 @@
       {% block content %}{% endblock %}
     </main>
     <footer class="site-footer">
-      <p>Copyright 2026 Nurtured Story | shel@nurturedstory.com | 470-599-5630</p>
+      <p>Copyright 2026 Nurtured Story | <a href="mailto:shel@nurturedstory.com">shel@nurturedstory.com</a> | <a href="tel:4705995630">470-599-5630</a></p>
       <p class="subtitle">Relational and Sex Counseling</p>
     </footer>
     {{ cosmic_scene|default:''|json_script:"cosmic-scene-config" }}

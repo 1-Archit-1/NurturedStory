@@ -121,15 +121,15 @@ RESOURCES = [
 
 
 SOLAR_SYSTEM = [
-    {"id": "mercury", "label": "Mercury", "size": 48, "palette": "slate"},
-    {"id": "venus", "label": "Venus", "size": 58, "palette": "rose"},
-    {"id": "earth", "label": "Earth", "size": 64, "palette": "blue"},
-    {"id": "mars", "label": "Mars", "size": 56, "palette": "champagne"},
-    {"id": "jupiter", "label": "Jupiter", "size": 200, "palette": "lilac", "ring": True},
-    {"id": "saturn", "label": "Saturn", "size": 170, "palette": "sage", "ring": True},
-    {"id": "uranus", "label": "Uranus", "size": 120, "palette": "teal"},
-    {"id": "neptune", "label": "Neptune", "size": 99, "palette": "violet"},
-    {"id": "pluto", "label": "Pluto", "size": 24, "palette": "slate"},
+    {"id": "mercury", "label": "Mercury", "size": 34, "palette": "slate"},
+    {"id": "venus", "label": "Venus", "size": 40, "palette": "rose"},
+    {"id": "earth", "label": "Earth", "size": 45, "palette": "blue"},
+    {"id": "mars", "label": "Mars", "size": 39, "palette": "champagne"},
+    {"id": "jupiter", "label": "Jupiter", "size": 160, "palette": "midnight"},
+    {"id": "saturn", "label": "Saturn", "size": 119, "palette": "sage", "ring": True},
+    {"id": "uranus", "label": "Uranus", "size": 84, "palette": "dusk-teal"},
+    {"id": "neptune", "label": "Neptune", "size": 69, "palette": "violet"},
+    {"id": "pluto", "label": "Pluto", "size": 17, "palette": "slate"},
 ]
 
 
