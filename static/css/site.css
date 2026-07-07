@@ -406,7 +406,7 @@ a {
 .page-intro {
   margin: 0 auto 2rem;
   text-align: left;
-  max-width: 960px;
+  max-width: min(1200px, 92vw);
 }
 
 .page-intro h1 {
@@ -437,10 +437,13 @@ a {
   font-size: 1.03rem;
 }
 
+/* --- HEADER STYLE 1: shared card headers — Home, Pricing, Trainings --- */
 .section-header {
   margin: 0 0 0.5rem;
   font-family: "Cinzel", serif;
   letter-spacing: 0.04em;
+  color: #d4a84b;
+  text-shadow: 0 0 14px rgba(212, 168, 75, 0.3);
 }
 
 .section-header::after {
@@ -450,6 +453,31 @@ a {
   height: 1px;
   margin-top: 0.35rem;
   background: linear-gradient(to right, rgba(180, 140, 255, 0.5), transparent);
+}
+
+/* --- SUB-HEADER: credentials, roles, secondary titles under a section-header --- */
+.sub-header {
+  margin: -0.2rem 0 0.9rem;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 0.88rem;
+  font-style: italic;
+  letter-spacing: 0.14em;
+  text-transform: none;
+  color: var(--muted);
+  opacity: 0.85;
+}
+
+/* --- HEADER STYLE 2: resource card titles — smaller, reserved height for alignment --- */
+.resource-title {
+  font-size: 0.95rem;
+  color: #d4a84b;
+  text-shadow: 0 0 14px rgba(212, 168, 75, 0.3);
+  min-height: 2.8rem;
+  display: flex;
+  align-items: flex-start;
+  margin: 0 0 0.5rem;
+  font-family: "Cinzel", serif;
+  letter-spacing: 0.04em;
 }
 
 .info-card-purple .section-header::after {
@@ -803,10 +831,16 @@ h2 {
   margin: 0;
   color: var(--muted);
   font-family: "Cormorant Garamond", serif;
+  font-size: 0.95rem;
+}
+
+.rate-row h3 {
+  font-size: 0.95rem;
+  margin: 0 0 0.15rem;
 }
 
 .rate-row strong {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-family: "Cinzel", serif;
   letter-spacing: 0.04em;
   color: #ffd060;
@@ -883,14 +917,21 @@ button:hover {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1.2rem;
-  max-width: 960px;
+  max-width: min(1200px, 92vw);
   margin: 0 auto;
 }
 
 .resource-card {
   text-align: left;
   width: 100%;
+  display: flex;
+  flex-direction: column;
   transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.resource-card .tagline {
+  flex: 1;
+  font-size: 1rem;
 }
 
 .resource-card:hover {
@@ -912,7 +953,7 @@ button:hover {
   margin: 0.9rem 0 0;
   text-transform: uppercase;
   letter-spacing: 0.09em;
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   color: rgba(200, 180, 255, 0.7);
   font-family: "Raleway", sans-serif;
 }
@@ -996,7 +1037,7 @@ button:hover {
   width: 100%;
   max-width: 560px;
   padding: 2.4rem 2.8rem;
-  text-align: center;
+  text-align: left;
 }
 
 .trainings-sprout {
