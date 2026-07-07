@@ -33,6 +33,22 @@
     <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.x/tsparticles.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tsparticles/plugin-manual-particles@4/tsparticles.plugin.manualParticles.min.js" defer></script>
     <script src="{% static 'js/cosmic_scene.js' %}" defer></script>
+
+    <script>
+      // Hide the floating Book button whenever the footer is visible
+      (() => {
+        const fab = document.getElementById("book-fab");
+        const footer = document.querySelector(".site-footer");
+        if (!fab || !footer) return;
+
+        const observer = new IntersectionObserver(
+          ([entry]) => fab.classList.toggle("fab-hidden", entry.isIntersecting),
+          { threshold: 0 }
+        );
+        observer.observe(footer);
+      })();
+    </script>
+
     {% block page_scripts %}{% endblock %}
   </body>
 </html>

@@ -1,15 +1,11 @@
 from pathlib import Path
 import os
 
-DEBUG = os.environ.get('RENDER', 'False') == 'False'
-
-ALLOWED_HOSTS = ['nurturedStory.onrender.com']
-
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "replace-me-before-production"
-DEBUG = True
-ALLOWED_HOSTS: list[str] = []
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dev-key-change-in-production')
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+ALLOWED_HOSTS = ['yourusername.pythonanywhere.com', 'localhost', '127.0.0.1']
 
 INSTALLED_APPS = [
     "django.contrib.admin",

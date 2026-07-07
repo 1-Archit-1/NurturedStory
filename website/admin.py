@@ -109,6 +109,19 @@ class SessionRateAdmin(admin.ModelAdmin):
     list_display = ["session_type", "duration_minutes", "price", "order", "is_active"]
     list_editable = ["price", "duration_minutes", "order", "is_active"]
     ordering = ["order"]
+    fieldsets = [
+        (None, {
+            "fields": ["session_type", "duration_minutes", "price", "note", "order", "is_active"],
+        }),
+        ("Contact Form Integration", {
+            "description": (
+                "This message is pre-filled in the contact form when a visitor "
+                "clicks the 'Book' button on this rate row. Leave blank to use "
+                "the default message."
+            ),
+            "fields": ["booking_message"],
+        }),
+    ]
 
 
 # ---------------------------------------------------------------------------

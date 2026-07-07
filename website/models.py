@@ -168,6 +168,17 @@ class SessionRate(models.Model):
         blank=True,
         help_text="Optional note shown beneath this rate row.",
     )
+    booking_message = models.TextField(
+        blank=True,
+        default="",
+        help_text=(
+            "Pre-filled message inserted into the contact form when a visitor "
+            "clicks 'Book' on this rate row. Use it to confirm the session type "
+            "they're enquiring about, e.g. "
+            "'Hi, I'm interested in booking an Individual Session (50 min, $150). "
+            "Please let me know your availability.'"
+        ),
+    )
     order = models.PositiveSmallIntegerField(default=0)
     is_active = models.BooleanField(default=True)
 

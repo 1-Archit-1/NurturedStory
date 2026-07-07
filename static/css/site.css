@@ -419,7 +419,7 @@ textarea { min-height: 140px; resize: vertical; }
   flex-shrink: 0;
   margin-top: auto;
   position: relative;
-  z-index: 2;
+  z-index: 1;  /* lower than page content — fixed overlays (modal, FAB) must sit above */
   border-top: 1px solid rgba(180, 140, 255, 0.18);
   background: rgba(5, 8, 20, 0.5);
   color: var(--muted);
@@ -539,7 +539,7 @@ textarea { min-height: 140px; resize: vertical; }
 }
 
 .constellation-group.is-lit .constellation-line {
-  stroke-width: 1.2;
+  stroke-width: 1.0;
   stroke-dasharray: 0 !important;
   stroke: rgba(220, 240, 255, 0.9);
 }
@@ -552,7 +552,7 @@ textarea { min-height: 140px; resize: vertical; }
 
 .is-lit .constellation-star {
   fill: #e0f0ff;
-  r: 2.5;
+  r: 1.8;
 }
 
 .constellation-label {
@@ -617,8 +617,8 @@ textarea { min-height: 140px; resize: vertical; }
 }
 
 @keyframes planetBreathe {
-  0%, 100% { opacity: 0.65; filter: saturate(0.8) brightness(0.9); }
-  50%       { opacity: 0.92; filter: saturate(1.05) brightness(1.08); }
+  0%, 100% { opacity: 0.55; filter: saturate(0.8) brightness(0.9); }
+  50%       { opacity: 0.79; filter: saturate(1.2) brightness(1.08); }
 }
 
 /* --- Planet colour palettes --- */
@@ -880,6 +880,13 @@ textarea { min-height: 140px; resize: vertical; }
   border-radius: var(--radius-md);
   padding: 0.8rem 0.9rem;
   margin-bottom: 0.65rem;
+  cursor: pointer;
+  transition: border-color 100ms ease, background 100ms ease;
+}
+
+.rate-row:hover {
+  border-color: rgba(180, 140, 255, 0.45);
+  background: rgba(140, 100, 240, 0.07);
 }
 
 .rate-row h3 {
@@ -894,12 +901,28 @@ textarea { min-height: 140px; resize: vertical; }
   font-size: 0.95rem;
 }
 
+/* Right-side price */
+.rate-price {
+  display: flex;
+  align-items: center;
+}
+
 .rate-row strong {
   font-family: "Cinzel", serif;
   font-size: 1.25rem;
   letter-spacing: 0.04em;
   color: var(--gold-bright);
   white-space: nowrap;
+}
+
+/* Flash highlight on the message field after auto-fill */
+@keyframes fieldHighlight {
+  0%   { border-color: rgba(180, 140, 255, 0.6); box-shadow: 0 0 0 3px rgba(140, 100, 240, 0.3); }
+  100% { border-color: rgba(180, 140, 255, 0.28); box-shadow: none; }
+}
+
+.field-highlighted {
+  animation: fieldHighlight 1.2s ease-out forwards;
 }
 
 .section-card .note {
@@ -993,10 +1016,10 @@ textarea { min-height: 140px; resize: vertical; }
   font-family: "Cinzel", serif;
   font-size: 0.95rem;
   letter-spacing: 0.04em;
+  text-align: center;
   color: var(--gold);
   text-shadow: 0 0 14px rgba(212, 168, 75, 0.3);
   min-height: 2.8rem;
-  display: flex;
   align-items: flex-start;
   margin: 0 0 0.5rem;
 }
@@ -1024,14 +1047,14 @@ textarea { min-height: 140px; resize: vertical; }
 .resource-emoji {
   font-size: 2rem;
   margin-bottom: 0.2rem;
+  text-align: center;
 }
 
 .resource-cta {
   margin: 0.9rem 0 0;
   font-family: "Raleway", sans-serif;
-  font-size: 0.72rem;
+  font-size: 0.1rem;
   letter-spacing: 0.09em;
-  text-transform: uppercase;
   color: rgba(200, 180, 255, 0.7);
 }
 
@@ -1241,7 +1264,44 @@ textarea { min-height: 140px; resize: vertical; }
 
   /* --- CTA pills --- */
 
-  .cta-book { font-size: 0.78rem; padding: 0.6rem 1.4rem; letter-spacing: 0.08em; }
+  /* Hide the in-column button — the FAB replaces it on mobile */
+  .cta-book { display: none; }
+
+  /* Floating action button — fixed bottom-right */
+  #book-fab {
+    display: inline-block;
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.25rem;
+    z-index: 9998;
+    padding: 0.7rem 1.3rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    border-radius: var(--radius-pill);
+    border: 1px solid rgba(200, 160, 255, 0.6);
+    background: rgba(120, 80, 220, 0.72);
+    backdrop-filter: blur(10px);
+    box-shadow:
+      0 4px 18px rgba(120, 80, 220, 0.45),
+      0 0 0 1px rgba(200, 160, 255, 0.15);
+    transition: background 150ms ease, box-shadow 150ms ease,
+                transform 150ms ease, opacity 200ms ease;
+  }
+
+  #book-fab.fab-hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(6px);
+  }
+
+  #book-fab:hover,
+  #book-fab:focus-visible {
+    background: rgba(140, 100, 240, 0.88);
+    box-shadow:
+      0 6px 24px rgba(140, 100, 240, 0.6),
+      0 0 0 1px rgba(200, 160, 255, 0.3);
+    transform: translateY(-2px);
+  }
 
   /* --- Services --- */
 

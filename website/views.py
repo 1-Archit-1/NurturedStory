@@ -140,6 +140,24 @@ def pricing(request: HttpRequest) -> HttpResponse:
     else:
         form = ContactForm()
 
+    rates = list(SessionRate.objects.filter(is_active=True))
+
+    # Build a plain Python list — the template's json_script filter will serialise it
+    rates_data = [
+        {
+            "id": r.pk,
+            "session_type": r.session_type,
+            "duration_minutes": r.duration_minutes,
+            "price": str(r.price),
+            "booking_message": r.booking_message or (
+                f"Hi, I'm interested in booking a {r.session_type} "
+                f"({r.duration_minutes} min, ${int(r.price)}). "
+                f"Please let me know your availability."
+            ),
+        }
+        for r in rates
+    ]
+
     context = {
         "active_page": "pricing",
         "form": form,
@@ -147,7 +165,8 @@ def pricing(request: HttpRequest) -> HttpResponse:
         # Singleton — phone, email, sliding scale note
         "site": SiteSettings.load(),
         # Active session rates in display order
-        "session_rates": SessionRate.objects.filter(is_active=True),
+        "session_rates": rates,
+        "session_rates_json": rates_data,
         "cosmic_scene": build_scene(
             solar_planets(
                 {

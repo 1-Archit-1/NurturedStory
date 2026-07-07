@@ -15,7 +15,7 @@
       <h2 class="section-header">Session Rates</h2>
 
       {% for rate in session_rates %}
-        <div class="rate-row">
+        <div class="rate-row" data-rate-id="{{ rate.pk }}">
           <div class="rate-info">
             <h3>{{ rate.session_type }}</h3>
             <p>{{ rate.duration_minutes }} minutes</p>
@@ -79,4 +79,44 @@
     {% endif %}
   </article>
 </section>
+
+{{ session_rates_json|json_script:"session-rates-data" }}
+
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+  (() => {
+    const dataEl = document.getElementById("session-rates-data");
+    if (!dataEl) return;
+
+    const rates = JSON.parse(dataEl.textContent);
+    const rateMap = Object.fromEntries(rates.map(r => [String(r.id), r]));
+
+    document.querySelectorAll(".rate-row[data-rate-id]").forEach(row => {
+      row.addEventListener("click", () => {
+        const rate = rateMap[row.getAttribute("data-rate-id")];
+        if (!rate) return;
+
+        // The form may not exist (e.g. after submission — success state shown)
+        const messageField = document.getElementById("id_message");
+        const formSection  = document.querySelector("[data-cosmic-anchor='contact-form']");
+
+        if (formSection) {
+          formSection.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+
+        if (messageField) {
+          messageField.value = rate.booking_message;
+          messageField.focus();
+          messageField.classList.remove("field-highlighted");
+          // Force reflow so the animation restarts if clicked multiple times
+          void messageField.offsetWidth;
+          messageField.classList.add("field-highlighted");
+          setTimeout(() => messageField.classList.remove("field-highlighted"), 1200);
+        }
+      });
+    });
+  })();
+</script>
 {% endblock %}

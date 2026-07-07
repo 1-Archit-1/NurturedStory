@@ -162,7 +162,7 @@
                 const star = document.createElementNS("http://www.w3.org/2000/svg", "circle");
                 star.setAttribute("cx", `${point.x}`);
                 star.setAttribute("cy", `${point.y}`);
-                star.setAttribute("r", i === 0 ? "2" : "1.2");
+                star.setAttribute("r", i === 0 ? "1.2" : "1.2");
                 star.setAttribute("class", "constellation-star");
                 svg.appendChild(star);
             });
