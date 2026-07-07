@@ -4,7 +4,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{% block title %}Nurtured Story{% endblock %}</title>
+    <title>{% block title %}{{ site.practice_name|default:"Nurtured Story" }}{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/site.css' %}" />
   </head>
   <body>
@@ -19,10 +19,16 @@
     <main class="container page-content">
       {% block content %}{% endblock %}
     </main>
+
     <footer class="site-footer">
-      <p>Copyright 2026 Nurtured Story | <a href="mailto:shel@nurturedstory.com">shel@nurturedstory.com</a> | <a href="tel:4705995630">470-599-5630</a></p>
-      <p class="subtitle">Relational and Sex Counseling</p>
+      <p>
+        {{ site.footer_text|default:"Copyright 2026 Nurtured Story" }} |
+        <a href="mailto:{{ site.email|default:'shel@nurturedstory.com' }}">{{ site.email|default:"shel@nurturedstory.com" }}</a> |
+        <a href="tel:{{ site.phone|default:'4705995630' }}">{{ site.phone|default:"470-599-5630" }}</a>
+      </p>
+      <p class="subtitle">{{ site.tagline|default:"Relational and Sex Counseling" }}</p>
     </footer>
+
     {{ cosmic_scene|default:''|json_script:"cosmic-scene-config" }}
     <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.x/tsparticles.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tsparticles/plugin-manual-particles@4/tsparticles.plugin.manualParticles.min.js" defer></script>

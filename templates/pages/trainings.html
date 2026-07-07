@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Trainings | Nurtured Story{% endblock %}
+{% block title %}Trainings | {{ site.practice_name|default:"Nurtured Story" }}{% endblock %}
 
 {% block content %}
 <section class="page-intro" data-cosmic-anchor="trainings-title">
@@ -9,14 +9,41 @@
 </section>
 
 <section class="trainings-wrap">
-  <article class="section-card trainings-card" data-cosmic-anchor="trainings-main">
-    <div class="trainings-sprout">🌱</div>
-    <h2 class="section-header">None currently available</h2>
-    <p>
-      Upcoming trainings will cover narrative therapy, relational wellness, and affirmative clinical practice.
-    </p>
-    <p>Interested in a workshop or speaking engagement?</p>
-    <a href="mailto:shel@nurturedstory.com" class="trainings-cta">Get in Touch</a>
-  </article>
+  {% if none_available %}
+    {# Placeholder shown when no trainings are published in the admin #}
+    <article class="section-card trainings-card" data-cosmic-anchor="trainings-main">
+      <div class="trainings-sprout">🌱</div>
+      <h2 class="section-header">None currently available</h2>
+      <p>
+        Upcoming trainings will cover narrative therapy, relational wellness, and affirmative clinical practice.
+      </p>
+      <p>Interested in a workshop or speaking engagement?</p>
+      <a href="mailto:{{ site.email|default:'shel@nurturedstory.com' }}" class="trainings-cta">Get in Touch</a>
+    </article>
+
+  {% else %}
+    {# Render each published training as its own card #}
+    {% for training in trainings %}
+      <article class="section-card trainings-card" data-cosmic-anchor="trainings-main">
+        <h2 class="section-header">{{ training.title }}</h2>
+        {% if training.date %}
+          <p class="training-date">{{ training.date|date:"F j, Y" }}</p>
+        {% endif %}
+        {% if training.description %}
+          <p>{{ training.description }}</p>
+        {% endif %}
+        {% if training.signup_url %}
+          <a href="{{ training.signup_url }}" class="trainings-cta" target="_blank" rel="noopener noreferrer">
+            Sign Up →
+          </a>
+        {% endif %}
+      </article>
+    {% endfor %}
+
+    <article class="section-card trainings-card trainings-contact" data-cosmic-anchor="trainings-contact">
+      <p>Interested in a workshop or speaking engagement?</p>
+      <a href="mailto:{{ site.email|default:'shel@nurturedstory.com' }}" class="trainings-cta">Get in Touch</a>
+    </article>
+  {% endif %}
 </section>
 {% endblock %}

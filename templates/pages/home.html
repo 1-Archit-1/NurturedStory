@@ -1,19 +1,23 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Home | Nurtured Story{% endblock %}
+{% block title %}Home | {{ site.practice_name|default:"Nurtured Story" }}{% endblock %}
 
 {% block content %}
 
 <section class="page-intro home-intro" data-cosmic-anchor="home-title">
-  <h1>Nurtured Story</h1>
-  <p class="lede">Relational and Sex Counseling</p>
+  <h1>{{ site.practice_name|default:"Nurtured Story" }}</h1>
+  <p class="lede">{{ site.tagline|default:"Relational and Sex Counseling" }}</p>
 </section>
 
 <section class="home-layout">
   <aside class="home-profile-column">
     <article class="photo-card section-card" data-cosmic-anchor="profile-photo">
-      <div role="img" aria-label="Therapist photo placeholder">
-        <img src="{% static 'shel-image.avif' %}" alt="Photo of Shel, a therapist" class="profile-photo" />
+      <div role="img" aria-label="Therapist photo">
+        {% if therapist.photo %}
+          <img src="{{ therapist.photo.url }}" alt="Photo of {{ therapist.name }}" class="profile-photo" />
+        {% else %}
+          <img src="{% static 'shel-image.avif' %}" alt="Photo of {{ therapist.name }}" class="profile-photo" />
+        {% endif %}
       </div>
     </article>
     <div class="connector-orbit" aria-hidden="true"></div>
@@ -23,50 +27,39 @@
   <div class="home-text-column">
     <article class="section-card info-card info-card-purple" data-cosmic-anchor="about-practice">
       <h2 class="section-header">About the Practice</h2>
-      <p> 
-        At Nurtured Story we utilize narrative therapy to explore, understand and reauthor the difficult stories influencing your relationships and sex life. 
-        The dominant narrative of our lives is influenced by the stories that shine the brightest in the constellation of our lives. We will work together to identify multiple stars in the solar systems of you to create new, better fitting constellations. 
-      </p>
-      <p>  
-        To do this we will utilize a mix of exploratory conversation, metaphor, art therapy (if you are into that), humor, and skill building.
-      </p>
-      <p>  
-        At Nurtured Story we specialize in supporting people with underrepresented stories; queer, neurodivergent, polyamorous or anyone a grandpa might define as  "a little different." We don't believe you need to "fit in" but we want to support you in finding the place you fit.
-      </p>
-      <p>  
-        We offer both in person and virtual service to remain accessible and inclusive to all Georgia residents, with our on person space located in Decatur, GA. 
-      </p>
-    </article>  </div>
+      {# about_practice supports multiple paragraphs separated by blank lines #}
+      {% for paragraph in site.about_practice.splitlines %}
+        {% if paragraph.strip %}
+          <p>{{ paragraph }}</p>
+        {% endif %}
+      {% endfor %}
+    </article>
+  </div>
 
   <article class="section-card info-card info-card-teal home-about-me" data-cosmic-anchor="about-me">
-    <h2 class="section-header">About Shel Pohnan</h2>
-    <p class="sub-header">APC · Certified Sex Therapist</p>
-    <p>
-      Neurodivergent counselor with a special interest in sexuality and relationships.  I once spent a summer studying human sexuality at the University of Amsterdam. That training continues to shape the way I approach conversations about desire, identity and connection. 
-    </p>
-    <p>
-I believe therapy works best when people are genuinely at ease. In my office we are curled up or criss cross on the couch, fidget buffet within arms reach, and shoes optional. Get comfortable to sit in discomfort. Discover a space where nothing is too awkward or "too much" to talk about. I'll do my best to foster a healing space to confront the effects of the problems keeping you stuck.
-    </p>
-    <p>
-      My clients would describe me as warm, grounded, and comforting while also providing structure and challenging the problems without shaming or blaming the individual. It's like if stardew valley met the Oregon Trail, don't worry though we have treatment or dysentery.  
-    </p>
+    <h2 class="section-header">About {{ therapist.name }}</h2>
+    <p class="sub-header">{{ therapist.credentials }}</p>
+    {# bio supports multiple paragraphs separated by blank lines #}
+    {% for paragraph in therapist.bio.splitlines %}
+      {% if paragraph.strip %}
+        <p>{{ paragraph }}</p>
+      {% endif %}
+    {% endfor %}
   </article>
 
   <article class="section-card home-services" data-cosmic-anchor="services">
-      <h2 class="section-header">Services</h2>
-      <p class="services-intro">Collaborative, affirming care for individuals, couples, and relationship systems.</p>
-      <div class="services-map-shell">
-        <div id="services-particles-canvas" class="services-particles-canvas" aria-hidden="true"></div>
-        <ul class="services-list">
-          <li>Individual sex therapy</li>
-          <li>Individual therapy to support and improve relationship skills (both romantic and platonic)</li>
-          <li>LGBTQ and intersex affirming therapy</li>
-          <li>Couples therapy</li>
-          <li>Poly/ENM relationship therapy</li>
-          <li>Couples/relationship sex therapy</li>
-          <li>Neurodivergent affirming therapy for individuals, parents of neurodivergent children, and partners of neurodivergent people</li>
-        </ul>
-      </div>
+    <h2 class="section-header">Services</h2>
+    <p class="services-intro">Collaborative, affirming care for individuals, couples, and relationship systems.</p>
+    <div class="services-map-shell">
+      <div id="services-particles-canvas" class="services-particles-canvas" aria-hidden="true"></div>
+      <ul class="services-list">
+        {% for service in services %}
+          <li>{{ service.label }}</li>
+        {% empty %}
+          <li>Services coming soon.</li>
+        {% endfor %}
+      </ul>
+    </div>
   </article>
 </section>
 {% endblock %}

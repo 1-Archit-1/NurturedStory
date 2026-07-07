@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Resources | Nurtured Story{% endblock %}
+{% block title %}Resources | {{ site.practice_name|default:"Nurtured Story" }}{% endblock %}
 
 {% block content %}
 <section class="page-intro" data-cosmic-anchor="resources-title">
@@ -10,7 +10,13 @@
 
 <section class="resource-grid">
   {% for resource in resources %}
-    <button class="section-card resource-card resource-open" type="button" data-resource-index="{{ forloop.counter0 }}" data-cosmic-anchor="resource-{{ resource.id }}" tabindex="0">
+    <button
+      class="section-card resource-card resource-open"
+      type="button"
+      data-resource-index="{{ forloop.counter0 }}"
+      data-cosmic-anchor="resource-{{ resource.id }}"
+      tabindex="0"
+    >
       <div class="resource-emoji">{{ resource.emoji }}</div>
       <h2 class="resource-title">{{ resource.title }}</h2>
       <p class="tagline">{{ resource.tagline }}</p>
@@ -23,8 +29,7 @@
   <div class="resource-modal-backdrop" data-close-modal="true"></div>
   <article class="section-card resource-modal-card" role="dialog" aria-modal="true" aria-labelledby="resource-modal-title">
     <button class="modal-close" type="button" id="resource-close" aria-label="Close">×</button>
-    <p id="resource-modal-emoji" class="resource-modal-emoji"></p>
-    <h2 id="resource-modal-title"></h2>
+    <h2 id="resource-modal-title" class="resource-title resource-modal-title"></h2>
     <p id="resource-modal-intro" class="tagline"></p>
     <div id="resource-modal-items" class="resource-modal-items"></div>
   </article>
@@ -44,30 +49,50 @@
       const buttons = document.querySelectorAll(".resource-open");
       const closeButton = document.getElementById("resource-close");
       const titleEl = document.getElementById("resource-modal-title");
-      const emojiEl = document.getElementById("resource-modal-emoji");
       const introEl = document.getElementById("resource-modal-intro");
       const itemsEl = document.getElementById("resource-modal-items");
 
       const openModal = (resource) => {
         titleEl.textContent = resource.title;
-        emojiEl.textContent = resource.emoji;
-        introEl.textContent = resource.intro;
+        introEl.textContent = resource.tagline;
         itemsEl.innerHTML = "";
 
-        resource.items.forEach((item) => {
-          const section = document.createElement("section");
-          section.className = "resource-item";
+        if (resource.links && resource.links.length > 0) {
+          // Render as a list of links
+          const list = document.createElement("ul");
+          list.className = "resource-link-list";
 
-          const heading = document.createElement("h3");
-          heading.textContent = item.heading;
+          resource.links.forEach((link) => {
+            const item = document.createElement("li");
+            item.className = "resource-item";
 
-          const description = document.createElement("p");
-          description.textContent = item.description;
+            const anchor = document.createElement("a");
+            anchor.href = link.url;
+            anchor.target = "_blank";
+            anchor.rel = "noopener noreferrer";
 
-          section.appendChild(heading);
-          section.appendChild(description);
-          itemsEl.appendChild(section);
-        });
+            const title = document.createElement("span");
+            title.className = "resource-item-title";
+            title.textContent = link.title;
+            anchor.appendChild(title);
+
+            if (link.description) {
+              const desc = document.createElement("p");
+              desc.className = "resource-item-desc";
+              desc.textContent = link.description;
+              anchor.appendChild(desc);
+            }
+
+            item.appendChild(anchor);
+            list.appendChild(item);
+          });
+
+          itemsEl.appendChild(list);
+        } else {
+          const empty = document.createElement("p");
+          empty.textContent = "No links available yet.";
+          itemsEl.appendChild(empty);
+        }
 
         modal.classList.remove("hidden");
         modal.setAttribute("aria-hidden", "false");

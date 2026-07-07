@@ -1,7 +1,7 @@
 <header class="site-header">
   <div class="container nav-wrap">
     <a class="brand" href="{% url 'home' %}">
-      <span class="brand-title">Nurtured Story</span>
+      <span class="brand-title">{{ site.practice_name|default:"Nurtured Story" }}</span>
     </a>
     <nav class="main-nav" aria-label="Main navigation">
       <a href="{% url 'home' %}" class="{% if active_page == 'home' %}active{% endif %}">Home</a>

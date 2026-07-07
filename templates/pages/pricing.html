@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Pricing | Nurtured Story{% endblock %}
+{% block title %}Pricing | {{ site.practice_name|default:"Nurtured Story" }}{% endblock %}
 
 {% block content %}
 <section class="page-intro" data-cosmic-anchor="pricing-title">
@@ -13,38 +13,40 @@
 
     <article class="section-card info-card info-card-purple" data-cosmic-anchor="session-rates">
       <h2 class="section-header">Session Rates</h2>
-      <div class="rate-row">
-        <div class="rate-info">
-          <h3>Individual Session</h3>
-          <p>50 minutes · one-on-one</p>
+
+      {% for rate in session_rates %}
+        <div class="rate-row">
+          <div class="rate-info">
+            <h3>{{ rate.session_type }}</h3>
+            <p>{{ rate.duration_minutes }} minutes</p>
+          </div>
+          <div class="rate-price">
+            <strong>${{ rate.price|floatformat:0 }}</strong>
+          </div>
         </div>
-        <div class="rate-price">
-          <strong>$150</strong>
-        </div>
-      </div>
-      <div class="rate-row">
-        <div class="rate-info">
-          <h3>Couples Session</h3>
-          <p>80 minutes · two partners</p>
-        </div>
-        <div class="rate-price">
-          <strong>$200</strong>
-        </div>
-      </div>
-      <p class="note">✦ Sliding scale available — reach out to discuss what works for you.</p>
+        {% if rate.note %}
+          <p class="note">{{ rate.note }}</p>
+        {% endif %}
+      {% empty %}
+        <p>Rate information coming soon.</p>
+      {% endfor %}
+
+      {% if site.sliding_scale_note %}
+        <p class="note">{{ site.sliding_scale_note }}</p>
+      {% endif %}
     </article>
 
     <article class="section-card info-card info-card-blue direct-card" data-cosmic-anchor="direct-contact">
       <h2 class="section-header">Reach Out Directly</h2>
       <p class="direct-card-intro">The fastest way to get started is a quick message or call.</p>
       <div class="direct-links">
-        <a href="tel:4705995630" class="direct-link">
+        <a href="tel:{{ site.phone|default:'4705995630' }}" class="direct-link">
           <span class="direct-link-icon">📞</span>
-          <span>470-599-5630</span>
+          <span>{{ site.phone|default:"470-599-5630" }}</span>
         </a>
-        <a href="mailto:shel@nurturedstory.com" class="direct-link">
+        <a href="mailto:{{ site.email|default:'shel@nurturedstory.com' }}" class="direct-link">
           <span class="direct-link-icon">✉️</span>
-          <span>shel@nurturedstory.com</span>
+          <span>{{ site.email|default:"shel@nurturedstory.com" }}</span>
         </a>
       </div>
     </article>
