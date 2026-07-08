@@ -222,29 +222,42 @@
         const allPlanets = document.querySelectorAll('.cosmic-planet');
         const allConstellations = document.querySelectorAll('.constellation-group');
 
-        let ticking = false;
+        let currentScroll = window.scrollY;
+        let targetScroll = window.scrollY;
+        let rafId = null;
+
+        const lerp = (a, b, t) => a + (b - a) * t;
 
         const applyParallax = () => {
-            const scrollY = window.scrollY;
+            // Smoothly interpolate toward the target scroll position
+            currentScroll = lerp(currentScroll, targetScroll, 0.08);
 
             allPlanets.forEach(planet => {
                 if (!planet) return;
                 const size = parseFloat(planet.style.width) || 70;
-                const speed = (size / 150) * 0.35;
-                planet.style.setProperty('--parallax-y', `${scrollY * -speed}px`);
+                const speed = (size / 150) * 0.25;
+                // Cap offset so planets can't be pushed off screen
+                const offset = Math.max(currentScroll * -speed, -120);
+                planet.style.setProperty('--parallax-y', `${offset}px`);
             });
 
             allConstellations.forEach(constellation => {
-                constellation.style.setProperty('--parallax-y', `${scrollY * -0.12}px`);
+                const offset = Math.max(currentScroll * -0.08, -80);
+                constellation.style.setProperty('--parallax-y', `${offset}px`);
             });
 
-            ticking = false;
+            // Keep looping only if still moving
+            if (Math.abs(currentScroll - targetScroll) > 0.5) {
+                rafId = requestAnimationFrame(applyParallax);
+            } else {
+                rafId = null;
+            }
         };
 
         window.addEventListener('scroll', () => {
-            if (!ticking) {
-                requestAnimationFrame(applyParallax);
-                ticking = true;
+            targetScroll = window.scrollY;
+            if (!rafId) {
+                rafId = requestAnimationFrame(applyParallax);
             }
         }, { passive: true });
     };

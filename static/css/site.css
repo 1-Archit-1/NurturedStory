@@ -66,6 +66,8 @@ html, body { min-height: 100%; scroll-behavior: smooth; }
     outline: none !important;
 }
 
+html { overflow-x: hidden; }
+
 body {
   margin: 0;
   min-height: 100vh;
@@ -74,7 +76,6 @@ body {
   position: relative;
   color: var(--text);
   font-family: "Raleway", sans-serif;
-  overflow-x: clip;
   background:
     radial-gradient(circle at 8% 10%, rgba(180,140,255,0.14), transparent 28%),
     radial-gradient(circle at 92% 20%, rgba(123,200,176,0.08), transparent 22%),
@@ -590,7 +591,7 @@ textarea { min-height: 140px; resize: vertical; }
   border-radius: 50%;
   --parallax-y: 0px;
   --hover-scale: 1;
-  will-change: transform;
+  will-change: transform, opacity;
   transform: translate3d(-50%, calc(-50% + var(--parallax-y)), 0) scale(var(--hover-scale));
   opacity: 0.8;
   filter: saturate(0.9);
@@ -631,8 +632,9 @@ textarea { min-height: 140px; resize: vertical; }
 }
 
 @keyframes planetBreathe {
-  0%, 100% { opacity: 0.55; filter: saturate(0.8) brightness(0.9); }
-  50%       { opacity: 0.79; filter: saturate(1.2) brightness(1.08); }
+  0%, 100% { opacity: 0.55; }
+  50%       { opacity: 0.79; }
+}
 }
 
 /* --- Planet colour palettes --- */
