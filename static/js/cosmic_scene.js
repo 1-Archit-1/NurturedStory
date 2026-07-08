@@ -226,27 +226,37 @@
         let targetScroll = window.scrollY;
         let rafId = null;
 
+        // Stable page height reference — ignore viewport resize from mobile address bar
+        // by only updating this on genuine orientation/layout changes, not scroll-driven resizes
+        let lastInnerWidth = window.innerWidth;
+        let stablePageHeight = document.body.scrollHeight;
+
         const lerp = (a, b, t) => a + (b - a) * t;
 
         const applyParallax = () => {
-            // Smoothly interpolate toward the target scroll position
             currentScroll = lerp(currentScroll, targetScroll, 0.08);
 
             allPlanets.forEach(planet => {
                 if (!planet) return;
                 const size = parseFloat(planet.style.width) || 70;
                 const speed = (size / 150) * 0.25;
-                // Cap offset so planets can't be pushed off screen
-                const offset = Math.max(currentScroll * -speed, -120);
+
+                // Cap based on planet's own top position so planets near the bottom
+                // aren't pushed off screen — max travel is proportional to where they sit
+                const topPct = parseFloat(planet.style.top) / 100;
+                const maxOffset = topPct * stablePageHeight * speed * 0.6;
+                const offset = Math.max(currentScroll * -speed, -maxOffset);
+
                 planet.style.setProperty('--parallax-y', `${offset}px`);
             });
 
             allConstellations.forEach(constellation => {
-                const offset = Math.max(currentScroll * -0.08, -80);
+                const topPct = parseFloat(constellation.style.top) / 100;
+                const maxOffset = topPct * stablePageHeight * 0.08 * 0.6;
+                const offset = Math.max(currentScroll * -0.08, -maxOffset);
                 constellation.style.setProperty('--parallax-y', `${offset}px`);
             });
 
-            // Keep looping only if still moving
             if (Math.abs(currentScroll - targetScroll) > 0.5) {
                 rafId = requestAnimationFrame(applyParallax);
             } else {
@@ -258,6 +268,15 @@
             targetScroll = window.scrollY;
             if (!rafId) {
                 rafId = requestAnimationFrame(applyParallax);
+            }
+        }, { passive: true });
+
+        // Only treat resize as genuine if the WIDTH changed (orientation change, window resize)
+        // Height-only changes are the mobile address bar — ignore them for parallax purposes
+        window.addEventListener('resize', () => {
+            if (window.innerWidth !== lastInnerWidth) {
+                lastInnerWidth = window.innerWidth;
+                stablePageHeight = document.body.scrollHeight;
             }
         }, { passive: true });
     };
