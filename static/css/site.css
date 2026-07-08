@@ -51,7 +51,7 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
-html, body { min-height: 100%; }
+html, body { min-height: 100%; scroll-behavior: smooth; }
 
 .noSelect {
     -webkit-tap-highlight-color: transparent;
@@ -1083,6 +1083,16 @@ textarea { min-height: 140px; resize: vertical; }
   display: grid;
   place-items: center;
   padding: 1rem;
+  animation: modalFadeIn 300ms ease-out forwards;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .resource-modal.hidden { display: none; }
@@ -1092,6 +1102,18 @@ textarea { min-height: 140px; resize: vertical; }
   inset: 0;
   background: rgba(5, 8, 20, 0.84);
   backdrop-filter: blur(8px);
+  animation: backdropFadeIn 300ms ease-out forwards;
+}
+
+@keyframes backdropFadeIn {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(8px);
+  }
 }
 
 .resource-modal-card {
@@ -1100,6 +1122,18 @@ textarea { min-height: 140px; resize: vertical; }
   max-height: min(88vh, 760px);
   overflow: auto;
   z-index: 1;
+  animation: cardSlideIn 350ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes cardSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 /* Modal title reuses .resource-title but without the min-height alignment trick */
@@ -1389,7 +1423,20 @@ textarea { min-height: 140px; resize: vertical; }
 
   /* --- Resource modal (bottom sheet on mobile) --- */
 
-  .resource-modal { padding: 0; align-items: flex-end; }
+  .resource-modal { 
+    padding: 0; 
+    align-items: flex-end;
+    animation: modalFadeInMobile 250ms ease-out forwards;
+  }
+
+  @keyframes modalFadeInMobile {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
 
   .resource-modal-card {
     width: 100%;
@@ -1397,8 +1444,21 @@ textarea { min-height: 140px; resize: vertical; }
     overflow: auto;
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     padding: 1.2rem 1rem 1.5rem;
+    animation: bottomSheetSlideIn 350ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   }
 
+  @keyframes bottomSheetSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  
   .resource-modal-card h2   { font-size: 1.05rem; margin-bottom: 0.25rem; }
   .resource-modal-card .tagline { font-size: 0.93rem; margin-bottom: 0.6rem; }
 

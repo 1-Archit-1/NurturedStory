@@ -100,20 +100,30 @@
 
         // The form may not exist (e.g. after submission — success state shown)
         const messageField = document.getElementById("id_message");
+        const nameField = document.getElementById("id_name");
         const formSection  = document.querySelector("[data-cosmic-anchor='contact-form']");
 
         if (formSection) {
-          formSection.scrollIntoView({ behavior: "smooth", block: "start" });
+          // Use a small delay for smoother UX
+          setTimeout(() => {
+            formSection.scrollIntoView({ behavior: "smooth", block: "center" });
+          }, 100);
         }
 
         if (messageField) {
           messageField.value = rate.booking_message;
-          messageField.focus();
-          messageField.classList.remove("field-highlighted");
-          // Force reflow so the animation restarts if clicked multiple times
-          void messageField.offsetWidth;
-          messageField.classList.add("field-highlighted");
-          setTimeout(() => messageField.classList.remove("field-highlighted"), 1200);
+          // Delay focus slightly so scroll completes first
+          setTimeout(() => {
+            // Focus on name field instead
+            if (nameField) {
+              nameField.focus();
+            }
+            messageField.classList.remove("field-highlighted");
+            // Force reflow so the animation restarts if clicked multiple times
+            void messageField.offsetWidth;
+            messageField.classList.add("field-highlighted");
+            setTimeout(() => messageField.classList.remove("field-highlighted"), 1200);
+          }, 300);
         }
       });
     });
