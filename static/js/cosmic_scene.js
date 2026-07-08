@@ -245,10 +245,7 @@
             currentScroll = lerp(currentScroll, targetScroll, 0.08);
 
             allWraps.forEach(wrap => {
-                const size = parseFloat(wrap.querySelector('.cosmic-planet')?.style.width) || 70;
-                // Larger planets move faster — visible depth effect
-                const speed = (size / 150) * 0.6;
-                const offset = currentScroll * -speed;
+                const offset = currentScroll * -0.6;
                 wrap.style.setProperty('--parallax-y', `${offset}px`);
             });
 
