@@ -22,6 +22,15 @@
 
     const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
+    // Cached planet/constellation refs — refreshed after any redraw
+    let allWraps = [];
+    let allConstellations = [];
+
+    const refreshParallaxTargets = () => {
+        allWraps = Array.from(document.querySelectorAll('.cosmic-planet-wrap'));
+        allConstellations = Array.from(document.querySelectorAll('.constellation-group'));
+    };
+
     const drawPlanets = () => {
         planetsHost.innerHTML = "";
         const planets = Array.isArray(config.planets) ? config.planets : [];
@@ -223,16 +232,11 @@
         });
     };
     const initParallax = () => {
-        // Pin the cosmic scene to an explicit pixel height so % positions
-        // never reflow when the mobile address bar hides/shows
         const sceneEl = document.getElementById("cosmic-scene");
         const pinSceneHeight = () => {
             if (sceneEl) sceneEl.style.height = `${document.body.scrollHeight}px`;
         };
         pinSceneHeight();
-
-        const allWraps = document.querySelectorAll('.cosmic-planet-wrap');
-        const allConstellations = document.querySelectorAll('.constellation-group');
 
         let currentScroll = window.scrollY;
         let targetScroll = window.scrollY;
@@ -244,14 +248,13 @@
         const applyParallax = () => {
             currentScroll = lerp(currentScroll, targetScroll, 0.08);
 
+            // Uses shared allWraps / allConstellations — always up to date after redraws
             allWraps.forEach(wrap => {
-                const offset = currentScroll * -0.6;
-                wrap.style.setProperty('--parallax-y', `${offset}px`);
+                wrap.style.setProperty('--parallax-y', `${currentScroll * -0.6}px`);
             });
 
             allConstellations.forEach(constellation => {
-                const offset = currentScroll * -0.15;
-                constellation.style.setProperty('--parallax-y', `${offset}px`);
+                constellation.style.setProperty('--parallax-y', `${currentScroll * -0.15}px`);
             });
 
             if (Math.abs(currentScroll - targetScroll) > 0.5) {
@@ -268,7 +271,7 @@
             }
         }, { passive: true });
 
-        // Only redraw + repin on genuine width change (orientation), not address bar show/hide
+        // Only repin on genuine width change — height-only = mobile address bar, ignore
         window.addEventListener('resize', () => {
             if (window.innerWidth !== lastInnerWidth) {
                 lastInnerWidth = window.innerWidth;
@@ -279,6 +282,7 @@
     const render = () => {
         drawPlanets();
         drawConstellations();
+        refreshParallaxTargets();
         
         initParallax();
         // Check repeatedly until tsParticles is loaded from the CDN
@@ -314,12 +318,16 @@
         });
     });
     let resizeTimer;
+    let lastResizeWidth = window.innerWidth;
     window.addEventListener("resize", () => {
+        // Ignore height-only changes (mobile address bar show/hide)
+        if (window.innerWidth === lastResizeWidth) return;
+        lastResizeWidth = window.innerWidth;
         window.clearTimeout(resizeTimer);
         resizeTimer = window.setTimeout(() => {
             drawPlanets();
             drawConstellations();
-            // Repin height after redraw so new planet positions are covered
+            refreshParallaxTargets();
             const sceneEl = document.getElementById("cosmic-scene");
             if (sceneEl) sceneEl.style.height = `${document.body.scrollHeight}px`;
         }, 120);
