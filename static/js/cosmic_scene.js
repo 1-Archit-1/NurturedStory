@@ -62,7 +62,8 @@
             planetEl.style.top = `${y}%`;
             planetEl.style.width = `${scaledSize}px`;
             planetEl.style.height = `${scaledSize}px`;
-            planetEl.style.setProperty("--planet-delay", `${seedValue(140 + index) * 4}s`);
+            planetEl.style.setProperty("--parallax-y", "0px");
+            planetEl.style.setProperty("--planet-delay", `-${seedValue(140 + index) * 8}s`);
 
             if (planet.ring) {
                 const ring = document.createElement("span");
@@ -126,8 +127,9 @@
             
             groupWrapper.style.left = `${leftPercent}%`;
             groupWrapper.style.top = `${topPercent}%`;
+            groupWrapper.style.setProperty("--parallax-y", "0px");
 
-            const randomDelay = Math.random() * 4;
+            const randomDelay = -(seedValue(200 + index) * 4);
             groupWrapper.style.animationDelay = `${randomDelay}s`;
 
             const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
