@@ -15,7 +15,7 @@
       <h2 class="section-header">Session Rates</h2>
 
       {% for rate in session_rates %}
-        <div class="rate-row" data-rate-id="{{ rate.pk }}">
+        <div class="rate-row noSelect" data-rate-id="{{ rate.pk }}">
           <div class="rate-info">
             <h3>{{ rate.session_type }}</h3>
             <p>{{ rate.duration_minutes }} minutes</p>
