@@ -31,6 +31,107 @@
         allConstellations = Array.from(document.querySelectorAll('.constellation-group'));
     };
 
+    // ── Planet SVG bands flag ──────────────────────────────────────────────
+    // Set to true for curved SVG bands, false to fall back to CSS ::after bands
+    const PLANET_SVG_BANDS = true;
+    // ──────────────────────────────────────────────────────────────────────
+
+    // Band definitions per palette: [yOffset (fraction of r), ry (fraction of r), opacity, color]
+    // yOffset: 0 = equator, negative = north, positive = south
+    // Palette keys must match:
+    //   views.py:  "palette" field in SOLAR_SYSTEM
+    //   site.css:  .palette-{name} class
+    const BAND_CONFIGS = {
+        "sage":      [ // Saturn — warm ochre/tan, prominent
+            [ 0.00, 0.18, 0.20, "rgba(210, 195, 155, 1)"],
+            [-0.18, 0.14, 0.16, "rgba(140, 120,  80, 1)"],
+            [ 0.22, 0.16, 0.18, "rgba(200, 180, 130, 1)"],
+            [-0.38, 0.12, 0.14, "rgba(100,  85,  55, 1)"],
+            [ 0.42, 0.13, 0.15, "rgba(190, 170, 120, 1)"],
+            [-0.58, 0.10, 0.12, "rgba(160, 145, 100, 1)"],
+        ],
+        "midnight":  [ // Jupiter — bold colorful bands
+            [-0.55, 0.10, 0.28, "rgba(200, 160, 120, 1)"],
+            [-0.38, 0.14, 0.32, "rgba(160, 100,  70, 1)"],
+            [-0.18, 0.16, 0.30, "rgba(210, 180, 140, 1)"],
+            [ 0.00, 0.18, 0.35, "rgba(170, 110,  80, 1)"],
+            [ 0.20, 0.16, 0.28, "rgba(200, 165, 125, 1)"],
+            [ 0.38, 0.14, 0.30, "rgba(140,  90,  60, 1)"],
+            [ 0.56, 0.10, 0.24, "rgba(190, 150, 110, 1)"],
+        ],
+        "dusk-teal": [ // Uranus — faint ice giant
+            [-0.20, 0.28, 0.08, "rgba(160, 210, 205, 1)"],
+            [ 0.15, 0.22, 0.07, "rgba(100, 170, 165, 1)"],
+            [ 0.45, 0.18, 0.06, "rgba( 80, 150, 145, 1)"],
+        ],
+        "violet":    [ // Neptune — deep blue
+            [-0.30, 0.20, 0.12, "rgba(100, 130, 200, 1)"],
+            [ 0.05, 0.24, 0.14, "rgba( 80, 100, 180, 1)"],
+            [ 0.38, 0.18, 0.10, "rgba(120, 150, 210, 1)"],
+        ],
+        "blue":      [ // Earth — faint cloud layers
+            [-0.25, 0.22, 0.07, "rgba(180, 210, 240, 1)"],
+            [ 0.10, 0.28, 0.08, "rgba(140, 180, 220, 1)"],
+            [ 0.40, 0.20, 0.06, "rgba(160, 200, 235, 1)"],
+        ],
+        "champagne": [ // Mars — subtle rusty surface
+            [-0.15, 0.20, 0.08, "rgba(200, 150, 110, 1)"],
+            [ 0.25, 0.18, 0.07, "rgba(170, 120,  85, 1)"],
+        ],
+        "rose":      [ // Venus — thick cloud bands
+            [-0.30, 0.20, 0.12, "rgba(230, 210, 180, 1)"],
+            [ 0.00, 0.26, 0.14, "rgba(210, 185, 150, 1)"],
+            [ 0.32, 0.20, 0.11, "rgba(225, 200, 165, 1)"],
+        ],
+        "slate":     [], // Mercury + Pluto — rocky, no bands
+    };
+
+    const buildPlanetBandsSvg = (size, palette) => {
+        const bands = BAND_CONFIGS[palette];
+        if (!bands || bands.length === 0) return null;
+
+        const ns  = "http://www.w3.org/2000/svg";
+        const svg = document.createElementNS(ns, "svg");
+        svg.setAttribute("viewBox", `0 0 ${size} ${size}`);
+        svg.style.cssText = "position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;";
+
+        const cx     = size / 2;
+        const cy     = size / 2;
+        const r      = size / 2;
+        const clipId = `planet-clip-${palette}-${size}`;
+
+        const defs       = document.createElementNS(ns, "defs");
+        const clip       = document.createElementNS(ns, "clipPath");
+        clip.setAttribute("id", clipId);
+        const clipCircle = document.createElementNS(ns, "circle");
+        clipCircle.setAttribute("cx", cx);
+        clipCircle.setAttribute("cy", cy);
+        clipCircle.setAttribute("r",  r);
+        clip.appendChild(clipCircle);
+        defs.appendChild(clip);
+        svg.appendChild(defs);
+
+        const g = document.createElementNS(ns, "g");
+        g.setAttribute("clip-path", `url(#${clipId})`);
+        g.setAttribute("transform", `rotate(-20, ${cx}, ${cy})`);
+
+        bands.forEach(([yFrac, ryFrac, opacity, color]) => {
+            const ellipse = document.createElementNS(ns, "ellipse");
+            ellipse.setAttribute("cx",           cx);
+            ellipse.setAttribute("cy",           cy + yFrac * r);
+            ellipse.setAttribute("rx",           r * 0.98);
+            ellipse.setAttribute("ry",           r * ryFrac);
+            ellipse.setAttribute("fill",         "none");
+            ellipse.setAttribute("stroke",       color);
+            ellipse.setAttribute("stroke-width", r * 0.13);
+            ellipse.setAttribute("opacity",      opacity);
+            g.appendChild(ellipse);
+        });
+
+        svg.appendChild(g);
+        return svg;
+    };
+
     const drawPlanets = () => {
         planetsHost.innerHTML = "";
         const planets = Array.isArray(config.planets) ? config.planets : [];
@@ -85,6 +186,15 @@
                 planetEl.appendChild(ring);
             }
 
+            // Planet SVG bands — injected when flag is on, CSS ::after used when off
+            if (PLANET_SVG_BANDS) {
+                const bandsSvg = buildPlanetBandsSvg(scaledSize, planet.palette || "violet");
+                if (bandsSvg) {
+                    planetEl.classList.add("has-svg-bands");
+                    planetEl.appendChild(bandsSvg);
+                }
+            }
+
             if (anchorEl) {
                 const activate = () => {
                     anchorEl.classList.add("is-cosmic-active");
@@ -106,40 +216,52 @@
     };
     const drawConstellations = () => {
         constellationHost.innerHTML = "";
-        
-        // Local coordinates for perfect squares
-        const localPoints = {
-            "big_dipper": [
-                {x: 5, y: 20}, {x: 25, y: 35}, {x: 50, y: 45}, {x: 40, y: 65},
-                {x: 75, y: 80}, {x: 95, y: 50}, {x: 80, y: 25}
-            ],
-            "orion": [
-                {x: 10, y: 15}, {x: 35, y: 20}, {x: 20, y: 50}, {x: 30, y: 55},
-                {x: 40, y: 50}, {x: 10, y: 95}, {x: 55, y: 90}, {x: 25, y: 5}
-            ],
-            "gemini": [
-                {x: 20, y: 10}, {x: 50, y: 25}, {x: 10, y: 60}, {x: 40, y: 65},
-                {x: 5, y: 95}, {x: 30, y: 100}, {x: 60, y: 80}, {x: 40, y: 5}
-            ]
-        };
 
         const constellations = Array.isArray(config.constellations) ? config.constellations : [];
 
+        // ── Placement presets ──────────────────────────────────────────────
+        // Each preset is an array of {left, top} (in %) — one entry per constellation.
+        // Add new presets here; set config.constellation_layout in views.py to switch.
+        const PLACEMENT_PRESETS = {
+            // Evenly distributed, alternating left/right (original behaviour)
+            "default": [
+                { left: 20, top: 26 },
+                { left: 80, top: 52 },
+                { left: 20, top: 78 },
+            ],
+            // Clustered in the top half, tighter spread
+            "top-heavy": [
+                { left: 15, top: 12 },
+                { left: 75, top: 22 },
+                { left: 45, top: 38 },
+            ],
+            // Wide diagonal — bottom-left to top-right
+            "diagonal": [
+                { left: 10, top: 75 },
+                { left: 50, top: 45 },
+                { left: 85, top: 15 },
+            ],
+        };
+
+        const layoutKey = config.constellation_layout || "default";
+        const placements = PLACEMENT_PRESETS[layoutKey] || PLACEMENT_PRESETS["default"];
+        // ──────────────────────────────────────────────────────────────────
+
         constellations.forEach((constellation, index) => {
-            const points = localPoints[constellation.id] || [];
+            const points = Array.isArray(constellation.points) ? constellation.points : [];
             if (points.length < 2) return;
 
-            // Distribute down the page safely
-            const t = (index + 1) / (constellations.length + 1);
-            const topPercent = 15 + (t * 70); 
-            const leftPercent = index % 2 === 0 ? 20 : 80;
+            const placement = placements[index] || {
+                left: index % 2 === 0 ? 20 : 80,
+                top: 15 + ((index + 1) / (constellations.length + 1)) * 70,
+            };
 
             const groupWrapper = document.createElement("div");
             groupWrapper.className = "constellation-group";
             groupWrapper.dataset.constellation = constellation.id || "";
-            
-            groupWrapper.style.left = `${leftPercent}%`;
-            groupWrapper.style.top = `${topPercent}%`;
+
+            groupWrapper.style.left = `${placement.left}%`;
+            groupWrapper.style.top  = `${placement.top}%`;
             groupWrapper.style.setProperty("--parallax-y", "0px");
 
             const randomDelay = -(seedValue(200 + index) * 4);
@@ -149,7 +271,7 @@
             svg.setAttribute("viewBox", "0 0 100 100");
             svg.style.width = "100%";
             svg.style.height = "100%";
-            svg.style.overflow = "visible"; 
+            svg.style.overflow = "visible";
 
             const linePairs =
                 constellation.id === "orion"
@@ -177,7 +299,7 @@
                 const star = document.createElementNS("http://www.w3.org/2000/svg", "circle");
                 star.setAttribute("cx", `${point.x}`);
                 star.setAttribute("cy", `${point.y}`);
-                star.setAttribute("r", i === 0 ? "1.2" : "1.2");
+                star.setAttribute("r", "1.2");
                 star.setAttribute("class", "constellation-star");
                 svg.appendChild(star);
             });

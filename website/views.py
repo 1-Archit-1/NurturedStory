@@ -19,34 +19,38 @@ from .models import (
 # ---------------------------------------------------------------------------
 
 SOLAR_SYSTEM = [
-    {"id": "mercury", "label": "Mercury", "size": 34, "palette": "slate"},
-    {"id": "venus", "label": "Venus", "size": 40, "palette": "rose"},
-    {"id": "earth", "label": "Earth", "size": 45, "palette": "blue"},
-    {"id": "mars", "label": "Mars", "size": 39, "palette": "champagne"},
-    {"id": "jupiter", "label": "Jupiter", "size": 160, "palette": "midnight"},
-    {"id": "saturn", "label": "Saturn", "size": 119, "palette": "sage", "ring": True},
-    {"id": "uranus", "label": "Uranus", "size": 84, "palette": "dusk-teal"},
-    {"id": "neptune", "label": "Neptune", "size": 69, "palette": "violet"},
-    {"id": "pluto", "label": "Pluto", "size": 17, "palette": "slate"},
+    # Palette names are magic strings — must match in all three places:
+    #   CSS:  .palette-{name}          → static/css/site.css  (base color + box-shadow)
+    #   JS:   BAND_CONFIGS["{name}"]   → static/js/cosmic_scene.js  (SVG band definitions)
+    {"id": "mercury", "label": "Mercury", "size": 34,  "palette": "slate"},
+    {"id": "venus",   "label": "Venus",   "size": 40,  "palette": "rose"},
+    {"id": "earth",   "label": "Earth",   "size": 45,  "palette": "blue"},
+    {"id": "mars",    "label": "Mars",    "size": 39,  "palette": "champagne"},
+    #{"id": "jupiter", "label": "Jupiter", "size": 160, "palette": "midnight"},
+    {"id": "saturn",  "label": "Saturn",  "size": 119, "palette": "sage", "ring": True},
+    {"id": "uranus",  "label": "Uranus",  "size": 84,  "palette": "dusk-teal"},
+    {"id": "neptune", "label": "Neptune", "size": 69,  "palette": "violet"},
+    {"id": "pluto",   "label": "Pluto",   "size": 17,  "palette": "slate"},
 ]
 
 
-def build_scene(planets: list[dict]) -> dict:
+def build_scene(planets: list[dict], constellation_layout: str = "default") -> dict:
     return {
         "stars": 120,
+        "constellation_layout": constellation_layout,
         "constellations": [
             {
                 "id": "big_dipper",
                 "label": "Big Dipper",
                 "color": "rgba(180, 210, 255, 0.42)",
                 "points": [
-                    {"x": 14, "y": 16},
-                    {"x": 18, "y": 21},
-                    {"x": 15, "y": 27},
-                    {"x": 11, "y": 23},
-                    {"x": 8, "y": 17},
-                    {"x": 6, "y": 12},
-                    {"x": 4, "y": 7},
+                    {"x": 5,  "y": 20},
+                    {"x": 25, "y": 35},
+                    {"x": 50, "y": 45},
+                    {"x": 40, "y": 65},
+                    {"x": 75, "y": 80},
+                    {"x": 95, "y": 50},
+                    {"x": 80, "y": 25},
                 ],
             },
             {
@@ -54,14 +58,14 @@ def build_scene(planets: list[dict]) -> dict:
                 "label": "Orion",
                 "color": "rgba(168, 210, 255, 0.36)",
                 "points": [
-                    {"x": 74, "y": 21},
-                    {"x": 80, "y": 22},
-                    {"x": 75, "y": 28},
-                    {"x": 77, "y": 28},
-                    {"x": 79, "y": 28},
-                    {"x": 75, "y": 34},
-                    {"x": 81, "y": 34},
-                    {"x": 78, "y": 16},
+                    {"x": 10, "y": 15},
+                    {"x": 35, "y": 20},
+                    {"x": 20, "y": 50},
+                    {"x": 30, "y": 55},
+                    {"x": 40, "y": 50},
+                    {"x": 10, "y": 95},
+                    {"x": 55, "y": 90},
+                    {"x": 25, "y": 5},
                 ],
             },
             {
@@ -69,14 +73,14 @@ def build_scene(planets: list[dict]) -> dict:
                 "label": "Gemini",
                 "color": "rgba(180, 210, 255, 0.32)",
                 "points": [
-                    {"x": 55, "y": 8},
-                    {"x": 59, "y": 13},
-                    {"x": 55, "y": 18},
-                    {"x": 59, "y": 19},
-                    {"x": 54, "y": 23},
-                    {"x": 58, "y": 24},
-                    {"x": 59, "y": 27},
-                    {"x": 56, "y": 4},
+                    {"x": 20, "y": 10},
+                    {"x": 50, "y": 25},
+                    {"x": 10, "y": 60},
+                    {"x": 40, "y": 65},
+                    {"x": 5,  "y": 95},
+                    {"x": 30, "y": 100},
+                    {"x": 60, "y": 80},
+                    {"x": 40, "y": 5},
                 ],
             },
         ],
@@ -117,7 +121,8 @@ def home(request: HttpRequest) -> HttpResponse:
                     "uranus": "about-me",
                     "neptune": None,
                 }
-            )
+            ),
+            constellation_layout= 'diagonal'
         ),
     }
     return render(request, "pages/home.html", context)
@@ -178,7 +183,8 @@ def pricing(request: HttpRequest) -> HttpResponse:
                     "uranus": "contact-form",
                     "neptune": None,
                 }
-            )
+            ),
+            constellation_layout= 'top-heavy'
         ),
     }
     return render(request, "pages/pricing.html", context)
