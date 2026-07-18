@@ -19,6 +19,12 @@
           <img src="{% static 'shel-image.avif' %}" alt="Photo of {{ therapist.name }}" class="profile-photo" />
         {% endif %}
       </div>
+      <div class="photo-card-byline">
+        <span class="photo-card-name">{{ therapist.name }}</span>
+        {% if therapist.credentials %}
+          <span class="photo-card-credentials">{{ therapist.credentials }}</span>
+        {% endif %}
+      </div>
     </article>
     <div class="connector-orbit" aria-hidden="true"></div>
     <a href="{% url 'pricing' %}" class="cta-book" id="book-fab">Book a Session</a>
@@ -47,24 +53,30 @@
     {% endfor %}
   </article>
 
-  <article class="section-card home-services" data-cosmic-anchor="services">
-    <h2 class="section-header">Services</h2>
-    <p class="services-intro">Collaborative, affirming care for individuals, couples, and relationship systems.</p>
-    <div class="services-map-shell">
-      <div id="services-particles-canvas" class="services-particles-canvas" aria-hidden="true"></div>
-      <ul class="services-list">
-        {% for service in services %}
-          <li>{{ service.label }}</li>
-        {% empty %}
-          <li>Services coming soon.</li>
-        {% endfor %}
-      </ul>
+  <section class="home-services" data-cosmic-anchor="services">
+    <h2 class="section-header services-header">Services</h2>
+    <div class="services-list">
+      {% for service in services %}
+        <div class="service-card section-card">
+          <h3 class="service-card-heading">{{ service.category|default:service.label }}</h3>
+          {% if service.blurb %}
+            <ul class="service-card-blurb">
+              {% for line in service.blurb.splitlines %}
+                {% if line.strip %}
+                  <li>{{ line.strip }}</li>
+                {% endif %}
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+      {% empty %}
+        <p>Services coming soon.</p>
+      {% endfor %}
     </div>
-  </article>
+  </section>
 </section>
 {% endblock %}
 
 {% block page_scripts %}
   {{ block.super }}
-  <script src="{% static 'js/services_particles.js' %}" defer></script>
 {% endblock %}

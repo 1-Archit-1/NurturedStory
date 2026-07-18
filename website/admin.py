@@ -4,6 +4,7 @@ from django.urls import reverse
 
 from .models import (
     ContactSubmission,
+    LicensurePage,
     ResourceCategory,
     ResourceLink,
     Service,
@@ -138,7 +139,7 @@ class ResourceLinkInline(admin.TabularInline):
     """
     model = ResourceLink
     extra = 1
-    fields = ["title", "url", "description", "order", "is_active"]
+    fields = ["title", "url", "file", "description", "order", "is_active"]
     ordering = ["order"]
 
 
@@ -171,6 +172,29 @@ class TrainingAdmin(admin.ModelAdmin):
         # Affects: training card heading, body text, date, and sign-up button
         (None, {
             "fields": ["title", "description", "date", "signup_url", "order", "is_published"],
+        }),
+    ]
+
+
+# ---------------------------------------------------------------------------
+# Licensure Page
+# Edits: all text content on the /licensure/ page — both cards + disclaimer
+# ---------------------------------------------------------------------------
+
+@admin.register(LicensurePage)
+class LicensurePageAdmin(SingletonModelAdmin):
+    fieldsets = [
+        ("Page Header", {
+            "fields": ["page_title", "page_lede"],
+        }),
+        ("Licensure Consultation Card", {
+            "fields": ["consult_intro", "consult_items", "consult_rate_label", "consult_rate"],
+        }),
+        ("CE Renewal Card", {
+            "fields": ["renewal_intro", "renewal_rate_label", "renewal_rate"],
+        }),
+        ("Disclaimer", {
+            "fields": ["disclaimer"],
         }),
     ]
 

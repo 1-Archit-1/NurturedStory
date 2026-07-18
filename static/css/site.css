@@ -2,7 +2,7 @@
    IMPORTS
 ============================================================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Sansita Swashed:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Raleway:wght@300;400;500;600&family=Sansita Swashed&family=Sansita+Swashed:wght@300..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sansita Swashed:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Cormorant Garamond:wght@300;400;500;600&family=Sansita Swashed&family=Sansita+Swashed:wght@300..900&display=swap');
 
 
 /* =============================================================================
@@ -18,8 +18,8 @@
 
   /* Text */
   --text:        #f0e8d5;
-  --muted:       #c8b8e8;
-  --accent-soft: #c7afea;
+  --muted:       #ddd4f0;
+  --accent-soft: #ddd4f0;
   --gold:        #d4a84b;
   --gold-bright: #ffd060;
 
@@ -75,7 +75,7 @@ body {
   flex-direction: column;
   position: relative;
   color: var(--text);
-  font-family: "Raleway", sans-serif;
+  font-family: "Cormorant Garamond", sans-serif;
   background:
     radial-gradient(circle at 8% 10%, rgba(180,140,255,0.14), transparent 28%),
     radial-gradient(circle at 92% 20%, rgba(123,200,176,0.08), transparent 22%),
@@ -127,16 +127,23 @@ a { color: var(--accent-soft); }
 /* Page-level title + lede block */
 .page-intro {
   margin: 0 auto 2rem;
-  text-align: left;
+  text-align: center;
   max-width: min(1200px, 92vw);
 }
 
 .page-intro h1 {
   margin: 0 0 0.4rem;
   font-family: "Sansita Swashed", serif;
-  font-size: clamp(1.9rem, 3.8vw, 2.8rem);
-  letter-spacing: 0.09em;
-  text-shadow: 0 0 24px rgba(180, 140, 255, 0.35);
+  font-weight: 400;
+  font-size: clamp(2.2rem, 4.5vw, 3.2rem);
+  letter-spacing: 0.02em;
+  text-transform: none;
+  text-shadow: 0 0 28px rgba(180, 140, 255, 0.45);
+}
+
+.page-intro .lede {
+  letter-spacing: 0.18em;
+  font-size: 1.1rem;
 }
 
 
@@ -184,7 +191,6 @@ h2 { font-size: 1.3rem; }
   margin: -0.2rem 0 0.9rem;
   font-family: "Cormorant Garamond", serif;
   font-size: 0.88rem;
-  font-style: italic;
   letter-spacing: 0.14em;
   color: var(--muted);
   opacity: 0.85;
@@ -231,12 +237,12 @@ h2 { font-size: 1.3rem; }
    BUTTONS & CTA LINKS
 ============================================================================= */
 
-button {
+button:not(.nav-dropdown-trigger):not(.modal-close) {
   border: 1px solid rgba(180, 140, 255, 0.35);
   border-radius: var(--radius-sm);
   background: var(--purple-bg);
   color: var(--text);
-  font-family: "Raleway", sans-serif;
+  font-family: "Cormorant Garamond", sans-serif;
   font-weight: 600;
   letter-spacing: 0.04em;
   padding: 0.65rem 0.9rem;
@@ -244,7 +250,7 @@ button {
   transition: background 150ms ease;
 }
 
-button:hover { background: var(--purple-bg-dark); }
+button:not(.nav-dropdown-trigger):not(.modal-close):hover { background: var(--purple-bg-dark); }
 
 /* Pill-shaped CTA (Home booking link, Trainings link) */
 .cta-book,
@@ -292,7 +298,7 @@ button:hover { background: var(--purple-bg-dark); }
 
 label {
   color: var(--muted);
-  font-family: "Raleway", sans-serif;
+  font-family: "Cormorant Garamond", sans-serif;
   font-size: 0.9rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -403,25 +409,112 @@ textarea { min-height: 140px; resize: vertical; }
   color: var(--muted);
 }
 
-.main-nav { display: flex; flex-wrap: wrap; gap: 0.55rem; }
+.main-nav { display: flex; flex-wrap: wrap; gap: 0.55rem; align-items: center; }
 
-.main-nav a {
-  color: var(--muted);
+/* Direct children only — does NOT apply to dropdown menu links */
+.main-nav > a {
+  color: var(--text);
   text-decoration: none;
   border: 1px solid transparent;
   border-radius: var(--radius-pill);
   padding: 0.5rem 0.85rem;
-  font-family: "Raleway", serif;
-  font-size: 0.7rem;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 0.85rem;
   letter-spacing: 0.1em;
   transition: color 150ms ease, border-color 150ms ease, background 150ms ease;
 }
 
-.main-nav a:hover,
-.main-nav a.active {
+.main-nav > a:hover{
+  color: var(--text);
+  background: var(--purple-bg);
+}
+.main-nav > a.active {
   color: var(--text);
   border-color: var(--purple-border);
   background: var(--purple-bg);
+}
+
+/* --- Nav dropdown --- */
+
+.nav-dropdown {
+  position: relative;
+}
+
+/* Trigger matches the top-level tab style exactly */
+.nav-dropdown-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--text);
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  padding: 0.5rem 0.85rem;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: color 150ms ease, border-color 150ms ease, background 150ms ease;
+}
+
+.nav-dropdown-trigger:hover,
+.nav-dropdown.is-open .nav-dropdown-trigger{
+  color: var(--text);
+  background: var(--purple-bg);
+} 
+.nav-dropdown.active .nav-dropdown-trigger{
+  color: var(--text);
+  border-color: var(--purple-border);
+  background: var(--purple-bg);
+}
+
+.nav-dropdown-caret {
+  font-size: 0.6rem;
+  transition: transform 150ms ease;
+}
+
+.nav-dropdown.is-open .nav-dropdown-caret {
+  transform: rotate(180deg);
+}
+
+.nav-dropdown-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  right: 0;
+  min-width: 240px;
+  margin: 0;
+  padding: 0.3rem;
+  list-style: none;
+  background: rgba(8, 10, 22, 0.98);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 4px 16px rgba(4, 8, 16, 0.5);
+  z-index: 10000;
+}
+
+.nav-dropdown.is-open .nav-dropdown-menu {
+  display: block;
+}
+
+/* Dropdown items — isolated from .main-nav a cascade */
+.nav-dropdown-menu a {
+  display: block;
+  padding: 0.45rem 1rem;
+  color: var(--muted);
+  font-family: "Cormorant Garamond", serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  border: none;
+  border-radius: 5px;
+  background: none;
+  transition: color 120ms ease, background 120ms ease;
+}
+
+.nav-dropdown-menu a:hover {
+  color: var(--text);
+  background: var(--purple-bg);
+  border-color: transparent;
 }
 
 
@@ -735,24 +828,9 @@ textarea { min-height: 140px; resize: vertical; }
    HOME PAGE
 ============================================================================= */
 
-/* Centred brand title — unique to the home hero */
+/* Home hero — tighter bottom margin vs other pages */
 .home-intro {
-  text-align: center;
   margin-bottom: 0.5rem;
-}
-
-.home-intro h1 {
-  font-family: "Sansita Swashed";
-  font-weight: 400;
-  font-size: clamp(2.2rem, 4.5vw, 3.2rem);
-  letter-spacing: 0.02em;
-  text-transform: none;
-  text-shadow: 0 0 28px rgba(180, 140, 255, 0.45);
-}
-
-.home-intro .lede {
-  letter-spacing: 0.18em;
-  font-size: 1.1rem;
 }
 
 /* Two-column grid: profile sidebar + text cards */
@@ -806,6 +884,30 @@ textarea { min-height: 140px; resize: vertical; }
   pointer-events: none;
 }
 
+.photo-card-byline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.6rem 0.25rem 0.1rem;
+}
+
+.photo-card-name {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.1rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--text);
+}
+
+.photo-card-credentials {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 0.82rem;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  opacity: 0.85;
+}
+
 /* Decorative dashed orbit arc between profile and cards */
 .connector-orbit {
   width: 180px;
@@ -853,95 +955,86 @@ textarea { min-height: 140px; resize: vertical; }
 .info-card-blue   .section-header::after { background: linear-gradient(to right, rgba(120, 190, 255, 0.5), transparent); }
 
 
-/* --- Services card (teal-themed, spans full width) --- */
+/* --- Services section (no outer box — cards float in the page background) --- */
 
 .home-services {
   grid-column: 1 / -1;
-  margin-top: 0.2rem;
-  border-color: rgba(130, 210, 190, 0.35);
-  background:
-    radial-gradient(circle at 88% 16%, rgba(120, 200, 176, 0.12), transparent 38%),
-    radial-gradient(circle at 12% 76%, rgba(120, 190, 255, 0.11), transparent 36%),
-    linear-gradient(140deg, rgba(10, 24, 40, 0.86), rgba(10, 30, 34, 0.86));
-  box-shadow: 0 14px 34px rgba(2, 14, 18, 0.34), inset 0 0 24px rgba(80, 150, 150, 0.12);
+  margin-top: 1.5rem;
 }
 
-.home-services .section-header::after {
+.services-header {
+  text-align: center;
+}
+
+.services-header::after {
+  margin-left: auto;
+  margin-right: auto;
   width: 6.2rem;
   background: linear-gradient(to right, rgba(120, 210, 185, 0.75), rgba(120, 190, 255, 0.3), transparent);
 }
 
-.services-intro {
-  margin: 0 0 0.95rem;
-  color: #cfe8e1;
-  font-size: 0.97rem;
-  letter-spacing: 0.02em;
-}
-
-/* Particle canvas wrapper */
-.services-map-shell {
-  position: relative;
-  border-radius: 22px;
-  overflow: hidden;
-  border: 1px solid rgba(130, 210, 190, 0.2);
-  background: linear-gradient(130deg, rgba(6, 18, 36, 0.34), rgba(4, 26, 30, 0.22));
-}
-
 .services-particles-canvas {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
+  display: none;
 }
 
 .services-list {
   position: relative;
   z-index: 1;
   margin: 0;
-  padding: 1.5rem;
-  list-style: none;
+  padding: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
-.services-list li {
-  position: relative;
-  padding: 0.85rem 1rem 0.85rem 2.1rem;
+/* Service card — heading + blurb, no hover */
+.service-card {
+  padding: 1.1rem 1.2rem;
   border: 1px solid rgba(120, 210, 185, 0.25);
   border-radius: var(--radius-md);
   background:
     radial-gradient(circle at 85% 16%, rgba(140, 220, 210, 0.08), transparent 45%),
     linear-gradient(125deg, rgba(14, 24, 32, 0.82), rgba(10, 20, 28, 0.82));
   backdrop-filter: blur(3px);
-  font-family: "Cormorant Garamond", serif;
-  font-size: 1.1rem;
-  line-height: 1.45;
   box-shadow: 0 4px 14px rgba(3, 12, 18, 0.18);
-  transition: border-color 200ms ease, box-shadow 200ms ease, transform 200ms ease;
 }
 
-/* Odd last item fills the row */
-.services-list li:last-child:nth-child(odd) { grid-column: 1 / -1; }
+/* Odd last card spans full width */
 
-/* Teal dot bullet */
-.services-list li::before {
-  content: "";
+.service-card-heading {
+  margin: 0 0 0.6rem;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  font-style: italic;
+  letter-spacing: 0.02em;
+  color: var(--gold-bright);
+}
+
+.service-card-blurb {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.service-card-blurb li {
+  position: relative;
+  padding-left: 1.1rem;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1rem;
+  line-height: 1.45;
+  color: --text;
+}
+
+/* Small teal dash bullet */
+.service-card-blurb li::before {
+  content: "–";
   position: absolute;
-  left: 0.78rem;
-  top: 0.9rem;
-  width: 0.68rem;
-  height: 0.68rem;
-  border-radius: var(--radius-pill);
-  border: 1px solid rgba(148, 240, 213, 0.85);
-  background: radial-gradient(circle at 35% 35%, #ddfff3 0%, #93ddc7 55%, #4a8e7e 100%);
-  box-shadow: 0 0 8px rgba(120, 225, 190, 0.45);
-}
-
-.services-list li:hover {
-  transform: translateY(-3px);
-  border-color: rgba(165, 240, 220, 0.5);
-  box-shadow: 0 8px 18px rgba(3, 12, 18, 0.24), 0 0 14px rgba(120, 210, 190, 0.14);
+  left: 0;
+  color: rgba(120, 225, 190, 0.6);
 }
 
 
@@ -1094,6 +1187,83 @@ textarea { min-height: 140px; resize: vertical; }
 
 
 /* =============================================================================
+   LICENSURE PAGE
+============================================================================= */
+
+.licensure-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 1.5rem;
+  max-width: 960px;
+  margin: 0 auto;
+  align-items: start;
+}
+
+.licensure-subheading {
+  margin: 1.2rem 0 0.5rem;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+.licensure-list {
+  margin: 0 0 1rem;
+  padding-left: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.licensure-list li {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.1rem;
+  line-height: 1.5;
+}
+
+.licensure-disclaimer {
+  max-width: 960px;
+  margin: 1.5rem auto 0;
+  text-align: center;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1rem;
+  color: var(--muted);
+  opacity: 0.7;
+  line-height: 1.6;
+}
+
+.licensure-rate-inline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.2rem 0 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(180, 140, 255, 0.15);
+}
+
+.licensure-rate-label {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.05rem;
+  color: var(--text);
+}
+
+.licensure-rate-price {
+  font-family: "Sansita Swashed", serif;
+  font-size: 1.2rem;
+  letter-spacing: 0.04em;
+  color: var(--gold-bright);
+  white-space: nowrap;
+}
+
+.licensure-cta {
+  display: inline-block;
+  margin-top: 0.25rem;
+}
+
+
+/* =============================================================================
    RESOURCES PAGE — GRID CARDS
 ============================================================================= */
 
@@ -1146,7 +1316,7 @@ textarea { min-height: 140px; resize: vertical; }
 
 .resource-cta {
   margin: 0.9rem 0 0;
-  font-family: "Raleway", sans-serif;
+  font-family: "Cormorant Garamond", sans-serif;
   font-size: 0.1rem;
   letter-spacing: 0.09em;
   color: rgba(200, 180, 255, 0.7);
@@ -1224,17 +1394,29 @@ textarea { min-height: 140px; resize: vertical; }
   margin: 0 2.5rem 0.3rem 0; /* right gap clears the close button */
 }
 
-/* Close button — absolute top-right */
+/* Close button — plain X, top-right */
 .modal-close {
   position: absolute;
-  right: 0.65rem;
-  top: 0.55rem;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
+  right: 0.75rem;
+  top: 0.75rem;
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  border: none;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
   line-height: 1;
-  font-size: 1.45rem;
-  padding: 0;
+  padding: 0.25rem;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 150ms ease;
+}
+
+.modal-close:hover {
+  color: var(--text);
 }
 
 /* Body scrolling lock while modal is open */
@@ -1242,44 +1424,42 @@ textarea { min-height: 140px; resize: vertical; }
 
 /* Link list inside the modal */
 .resource-modal-items {
-  display: grid;
-  gap: 0.4rem;
-  margin-top: 0.4rem;
+  margin-top: 0.6rem;
 }
 
 .resource-link-list {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: grid;
-  gap: 0.4rem;
 }
 
-/* Each resource row is fully clickable via the wrapping anchor */
+/* Each link is a plain row separated by a faint divider */
 .resource-item {
-  border: 1px solid rgba(180, 140, 255, 0.18);
-  border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.02);
-  transition: border-color 80ms ease, background 80ms ease;
+  border-bottom: 1px solid rgba(180, 140, 255, 0.1);
 }
 
-.resource-item:hover {
-  border-color: rgba(200, 170, 255, 0.42);
-  background: rgba(140, 100, 240, 0.07);
+.resource-item:last-child {
+  border-bottom: none;
 }
 
 .resource-item a {
   display: block;
-  padding: 0.5rem 0.75rem;
+  padding: 0.65rem 0.75rem;
   color: inherit;
   text-decoration: none;
+  border-radius: 5px;
+  transition: color 120ms ease, background 120ms ease;
+}
+
+.resource-item a:hover {
+  background: var(--purple-bg);
 }
 
 .resource-item-title {
   display: block;
-  color: var(--accent-soft);
-  font-family: "Raleway", sans-serif;
-  font-size: 0.88rem;
+  color: var(--text);
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.1rem;
   font-weight: 500;
   letter-spacing: 0.02em;
   line-height: 1.35;
@@ -1290,15 +1470,15 @@ textarea { min-height: 140px; resize: vertical; }
 
 .resource-item-title::after {
   content: " ↗";
-  font-size: 0.72rem;
+  font-size: 0.8rem;
   opacity: 0.55;
 }
 
-.resource-item-desc {
+.resource-item .resource-item-desc {
   display: block;
   margin: 0.2rem 0 0;
   font-family: "Cormorant Garamond", serif;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: var(--muted);
   line-height: 1.45;
   opacity: 0.8;
@@ -1316,9 +1496,6 @@ textarea { min-height: 140px; resize: vertical; }
     padding: 1rem;
     gap: 0.65rem;
   }
-
-  .services-list li { font-size: 0.97rem; padding: 0.7rem 0.75rem 0.7rem 1.9rem; }
-  .services-list li:last-child:nth-child(odd) { grid-column: 1 / -1; }
 }
 
 /* Resources: 2-col on tablets */
@@ -1362,8 +1539,8 @@ textarea { min-height: 140px; resize: vertical; }
   /* --- Typography --- */
 
   .home-intro h1  { font-size: clamp(1.5rem, 7vw, 2rem); }
-  .page-intro h1  { font-size: clamp(1.4rem, 6vw, 1.9rem); }
-  .home-intro .lede { font-size: 0.88rem; letter-spacing: 0.12em; }
+  .page-intro h1  { font-size: clamp(1.5rem, 7vw, 2rem); }
+  .page-intro .lede { font-size: 0.88rem; letter-spacing: 0.12em; }
   h2  { font-size: 1.1rem; }
   .lede { font-size: 1rem; letter-spacing: 0.04em; }
 
@@ -1379,7 +1556,12 @@ textarea { min-height: 140px; resize: vertical; }
   .brand-title { font-size: 1rem; }
   .brand-subtitle { display: none; }
   .main-nav { gap: 0.3rem; }
-  .main-nav a { font-size: 0.68rem; padding: 0.35rem 0.55rem; letter-spacing: 0.06em; }
+  .main-nav a { font-size: 0.78rem; padding: 0.35rem 0.55rem; letter-spacing: 0.06em; }
+  .nav-dropdown-trigger { font-size: 0.78rem; padding: 0.35rem 0.55rem; letter-spacing: 0.06em; }
+  .nav-dropdown-menu { right: 0; left: auto; min-width: 220px; }
+
+  /* --- Licensure --- */
+  .licensure-layout { grid-template-columns: 1fr; }
 
   /* --- Footer --- */
 
@@ -1433,9 +1615,6 @@ textarea { min-height: 140px; resize: vertical; }
 
   /* --- Services --- */
 
-  .services-map-shell { border-radius: 16px; border-color: rgba(130, 210, 190, 0.15); }
-  .services-particles-canvas { display: none; }
-  .services-intro { margin-bottom: 0.65rem; font-size: 0.82rem; letter-spacing: 0.03em; }
 
   .services-list {
     grid-template-columns: 1fr;
@@ -1443,31 +1622,8 @@ textarea { min-height: 140px; resize: vertical; }
     gap: 0.6rem;
   }
 
-  .services-list li:last-child:nth-child(odd) { grid-column: auto; }
-
-  .services-list li {
-    font-size: 1.05rem;
-    padding: 0.75rem 0.85rem 0.75rem 2rem;
-    border-radius: var(--radius-md);
-    line-height: 1.5;
-  }
-
-  .services-list li::before {
-    left: 0.65rem;
-    top: 0.85rem;
-    width: 0.62rem;
-    height: 0.62rem;
-    animation: dotPulse 2.8s ease-in-out infinite;
-    animation-delay: calc(var(--i, 0) * 0.4s);
-  }
-
-  .services-list li:nth-child(1)::before { --i: 0; }
-  .services-list li:nth-child(2)::before { --i: 1; }
-  .services-list li:nth-child(3)::before { --i: 2; }
-  .services-list li:nth-child(4)::before { --i: 3; }
-  .services-list li:nth-child(5)::before { --i: 4; }
-  .services-list li:nth-child(6)::before { --i: 5; }
-  .services-list li:nth-child(7)::before { --i: 6; }
+  .service-card-heading { font-size: 1.05rem; }
+  .service-card-blurb li { font-size: 0.97rem; }
 
   /* --- Pricing --- */
 

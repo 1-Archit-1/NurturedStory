@@ -5,6 +5,7 @@ from django.urls import reverse
 from .forms import ContactForm
 from .models import (
     ContactSubmission,
+    LicensurePage,
     ResourceCategory,
     Service,
     SessionRate,
@@ -208,7 +209,7 @@ def resources(request: HttpRequest) -> HttpResponse:
             "links": [
                 {
                     "title": link.title,
-                    "url": link.url,
+                    "url": link.href(),
                     "description": link.description,
                 }
                 for link in cat.links.filter(is_active=True)
@@ -262,3 +263,25 @@ def trainings(request: HttpRequest) -> HttpResponse:
         ),
     }
     return render(request, "pages/trainings.html", context)
+
+
+def licensure(request: HttpRequest) -> HttpResponse:
+    context = {
+        "active_page": "licensure",
+        "site": SiteSettings.load(),
+        "page": LicensurePage.load(),
+        "cosmic_scene": build_scene(
+            solar_planets(
+                {
+                    "venus": "licensure-intro",
+                    "earth": "licensure-intro",
+                    "mars": "licensure-rates",
+                    "jupiter": None,
+                    "saturn": None,
+                    "uranus": None,
+                    "neptune": None,
+                }
+            )
+        ),
+    }
+    return render(request, "pages/licensure.html", context)

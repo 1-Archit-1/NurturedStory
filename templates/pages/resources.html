@@ -53,7 +53,7 @@
 
       const openModal = (resource) => {
         titleEl.textContent = resource.title;
-        introEl.textContent = resource.tagline;
+        introEl.textContent = "";
         itemsEl.innerHTML = "";
 
         if (resource.links && resource.links.length > 0) {

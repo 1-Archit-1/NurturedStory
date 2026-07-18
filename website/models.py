@@ -86,8 +86,8 @@ class TherapistProfile(SingletonModel):
     credentials = models.CharField(
         max_length=200,
         blank=True,
-        default="APC · Certified Sex Therapist",
-        help_text="Shown under the therapist name, e.g. 'APC · Certified Sex Therapist'",
+        default="APC · Sex Therapist",
+        help_text="Shown under the therapist name, e.g. 'APC · Sex Therapist'",
     )
     bio = models.TextField(
         blank=True,
@@ -114,17 +114,30 @@ class TherapistProfile(SingletonModel):
 
 class Service(models.Model):
     """
-    A single bullet point in the Services section on the home page.
+    A service card in the Services section on the home page.
 
     Website location:
-      - label → each <li> inside the 'Services' card at the bottom of the home page
-                (e.g. 'Individual sex therapy', 'Couples therapy', etc.)
+      - category → card heading, e.g. 'Individual Sex Therapy'
+      - blurb    → comma/newline-separated bullet points shown beneath the heading
+      - order    → left-to-right / top-to-bottom card order in the grid
 
     Use `order` to control the sequence. Toggle `is_active` to hide an item
     without deleting it.
     """
 
-    label = models.CharField(max_length=300)
+    label = models.CharField(
+        max_length=300,
+        help_text="Short display name — shown as fallback if category is blank.",
+    )
+    category = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="Card heading, e.g. 'Individual Sex Therapy'.",
+    )
+    blurb = models.TextField(
+        blank=True,
+        help_text="Bullet points for this service, one per line.",
+    )
     order = models.PositiveSmallIntegerField(default=0)
     is_active = models.BooleanField(default=True)
 
@@ -233,7 +246,9 @@ class ResourceLink(models.Model):
 
     Website location:
       - title       → link text shown in the modal list
-      - url         → the href the link points to
+      - url         → external href (used when no file is uploaded)
+      - file        → uploaded file (PDF, DOCX, etc.) — if present, takes
+                      priority over url and opens directly in the browser
       - description → short subtext shown beneath the link title in the modal
       - order       → top-to-bottom order within the modal link list
 
@@ -246,7 +261,16 @@ class ResourceLink(models.Model):
         related_name="links",
     )
     title = models.CharField(max_length=200)
-    url = models.URLField()
+    url = models.URLField(
+        blank=True,
+        help_text="External URL. Leave blank if uploading a file instead.",
+    )
+    file = models.FileField(
+        upload_to="resources/",
+        blank=True,
+        null=True,
+        help_text="Upload a PDF or other file. If provided, this takes priority over the URL field.",
+    )
     description = models.CharField(
         max_length=400,
         blank=True,
@@ -259,6 +283,12 @@ class ResourceLink(models.Model):
         ordering = ["order"]
         verbose_name = "Resource Link"
         verbose_name_plural = "Resource Links"
+
+    def href(self) -> str:
+        """Returns the file URL if a file is uploaded, otherwise the url field."""
+        if self.file:
+            return self.file.url
+        return self.url
 
     def __str__(self):
         return f"{self.category.name} — {self.title}"
@@ -307,6 +337,92 @@ class Training(models.Model):
 
     def __str__(self):
         return self.title
+
+
+# ---------------------------------------------------------------------------
+# Licensure page
+# ---------------------------------------------------------------------------
+
+class LicensurePage(SingletonModel):
+    """
+    Content for the Georgia LPC/APC Licensure Consultation page — one row, always.
+
+    Website locations:
+      - page_title         → <h1> and browser tab title
+      - page_lede          → subtitle beneath the heading
+      - consult_intro      → opening paragraph in the main (teal) card
+      - consult_items      → bullet points in the main card, one per line
+      - consult_rate_label → label beside the $50/hr rate (e.g. 'Consultation Rate')
+      - consult_rate       → rate string shown in the main card (e.g. '$50 / hour')
+      - renewal_intro      → body text in the CE Renewal (purple) card
+      - renewal_rate_label → label beside the $75 rate
+      - renewal_rate       → rate string shown in the renewal card (e.g. '$75')
+      - disclaimer         → small muted note shown beneath both cards
+    """
+
+    page_title = models.CharField(
+        max_length=200,
+        default="Georgia LPC/APC Licensure  Consultation",
+    )
+    page_lede = models.CharField(
+        max_length=300,
+        default="Support for counselors-in-training and associate-level clinicians",
+    )
+
+    # Main consultation card
+    consult_intro = models.TextField(
+        default=(
+            "Navigating the LPC/APC licensure process can feel overwhelming, especially "
+            "when trying to understand application requirements, documentation, supervision "
+            "requirements, and renewal processes. I offer consultation to help "
+            "counselors-in-training and associate-level clinicians better understand and "
+            "navigate the Georgia licensure process."
+        ),
+        help_text="Opening paragraph in the Licensure Consultation card.",
+    )
+    consult_items = models.TextField(
+        default=(
+            "Guidance on the Georgia LPC/APC application process\n"
+            "Reviewing application requirements and documentation\n"
+            "Support with understanding supervision requirements\n"
+            "Assistance navigating the renewal process / CE requirements\n"
+            "General guidance on maintaining licensure requirements"
+        ),
+        help_text="Bullet points for the consultation card, one per line.",
+    )
+    consult_rate_label = models.CharField(max_length=100, default="Consultation Rate")
+    consult_rate = models.CharField(max_length=50, default="$50 / hour")
+
+    # CE Renewal card
+    renewal_intro = models.TextField(
+        default=(
+            "This consultation includes a review of your current continuing education (CE) "
+            "credits, a detailed report outlining any remaining CE requirements, and a "
+            "curated list of available CE opportunities to help you complete your renewal "
+            "requirements."
+        ),
+        help_text="Body text for the CE Renewal Consultation card.",
+    )
+    renewal_rate_label = models.CharField(max_length=100, default="Rate")
+    renewal_rate = models.CharField(max_length=50, default="$75")
+
+    # Disclaimer
+    disclaimer = models.TextField(
+        default=(
+            "This service is intended to provide support and clarification throughout the "
+            "licensure process. It does not replace guidance from the Georgia Composite "
+            "Board, and applicants are responsible for ensuring they meet all current "
+            "licensure requirements."
+        ),
+        help_text="Disclaimer note shown beneath both cards.",
+    )
+
+    class Meta:
+        verbose_name = "Licensure Page"
+        verbose_name_plural = "Licensure Page"
+
+    def __str__(self):
+        return self.page_title
 
 
 # ---------------------------------------------------------------------------

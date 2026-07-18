@@ -7,7 +7,19 @@
       <a href="{% url 'home' %}" class="{% if active_page == 'home' %}active{% endif %}">Home</a>
       <a href="{% url 'pricing' %}" class="{% if active_page == 'pricing' %}active{% endif %}">Pricing</a>
       <a href="{% url 'resources' %}" class="{% if active_page == 'resources' %}active{% endif %}">Resources</a>
-      <a href="{% url 'trainings' %}" class="{% if active_page == 'trainings' %}active{% endif %}">Trainings</a>
+      <div class="nav-dropdown {% if active_page == 'trainings' or active_page == 'licensure' %}active{% endif %}">
+        <button class="nav-dropdown-trigger" aria-expanded="false" aria-haspopup="true">
+          For Therapists <span class="nav-dropdown-caret" aria-hidden="true">▾</span>
+        </button>
+        <ul class="nav-dropdown-menu" role="menu">
+          <li role="none">
+            <a href="{% url 'trainings' %}" role="menuitem" class="{% if active_page == 'trainings' %}active{% endif %}">Trainings</a>
+          </li>
+          <li role="none">
+            <a href="{% url 'licensure' %}" role="menuitem" class="{% if active_page == 'licensure' %}active{% endif %}">Georgia LPC/APC Licensure Consultation</a>
+          </li>
+        </ul>
+      </div>
     </nav>
   </div>
 </header>

@@ -155,24 +155,20 @@
             const scaledSize = Math.round(size * mobileFactor);
             const t = (index + 1) / (planets.length + 1);
 
-            // 1. THE INWARD CURVE
-            const basePathX = 20 + (t * 60) - (Math.sin(t * Math.PI) * 26);
-            const basePathY = 8 + (t * 84);
-
-            // 2. THE ANTI-COLLISION STAGGER
-            const staggerX = (index % 2 === 0 ? -1 : 1) * 12;
-            const scatterY = (seedValue(90 + index) - 0.5) * 4;
-
-            const pathX = clamp(basePathX + staggerX, 5, 95);
-            const pathY = clamp(basePathY + scatterY, 5, 95);
+            // Quadratic bezier arc: P0=(10,5) control=(15,90) P1=(90,92)
+            // Control point bottom-left makes the curve concave (bowing inward).
+            const bx = (1 - t) * (1 - t) * 10 + 2 * (1 - t) * t * 15 + t * t * 90;
+            const by = (1 - t) * (1 - t) *  5 + 2 * (1 - t) * t * 90 + t * t * 92;
+            const pathX = clamp(bx, 5, 95);
+            const pathY = clamp(by, 5, 95);
 
             const anchorEl = planet.anchor ? document.querySelector(`[data-cosmic-anchor="${planet.anchor}"]`) : null;
             const anchorRect = anchorEl ? anchorEl.getBoundingClientRect() : null;
             const anchorX = anchorRect ? ((anchorRect.left + anchorRect.width / 2) / window.innerWidth) * 100 : null;
             const anchorY = anchorRect ? ((anchorRect.top + anchorRect.height / 2) / window.innerHeight) * 100 : null;
 
-            const x = clamp(anchorX !== null ? pathX * 0.95 + anchorX * 0.05 : pathX, 5, 95);
-            const y = clamp(anchorY !== null ? pathY * 0.95 + anchorY * 0.05 : pathY, 5, 95);
+            const x = clamp(pathX, 5, 95);
+            const y = clamp(pathY, 5, 95);
 
             wrapEl.style.left = `${x}%`;
             wrapEl.style.top = `${y}%`;

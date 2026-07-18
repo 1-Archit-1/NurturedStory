@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ page.page_title }} | {{ site.practice_name|default:"Nurtured Story" }}{% endblock %}
+
+{% block content %}
+<section class="page-intro" data-cosmic-anchor="licensure-title">
+  <h1>{{ page.page_title }}</h1>
+  <p class="lede">{{ page.page_lede }}</p>
+</section>
+
+<section class="licensure-layout">
+
+  <article class="section-card info-card info-card-teal" data-cosmic-anchor="licensure-intro">
+    <h2 class="section-header">Licensure Consultation</h2>
+    <p>{{ page.consult_intro }}</p>
+    <h3 class="licensure-subheading">Consultation may include:</h3>
+    <ul class="licensure-list">
+      {% for item in page.consult_items.splitlines %}
+        {% if item.strip %}<li>{{ item.strip }}</li>{% endif %}
+      {% endfor %}
+    </ul>
+    <div class="licensure-rate-inline">
+      <span class="licensure-rate-label">{{ page.consult_rate_label }}</span>
+      <span class="licensure-rate-price">{{ page.consult_rate }}</span>
+    </div>
+    <a href="{% url 'pricing' %}" class="cta-book licensure-cta">Book a Consultation</a>
+  </article>
+
+  <article class="section-card info-card info-card-purple" data-cosmic-anchor="licensure-rates">
+    <h2 class="section-header">CE Renewal Consultation</h2>
+    <p>{{ page.renewal_intro }}</p>
+    <div class="licensure-rate-inline">
+      <span class="licensure-rate-label">{{ page.renewal_rate_label }}</span>
+      <span class="licensure-rate-price">{{ page.renewal_rate }}</span>
+    </div>
+    <a href="{% url 'pricing' %}" class="cta-book licensure-cta">Book a Consultation</a>
+  </article>
+
+</section>
+
+<p class="licensure-disclaimer">{{ page.disclaimer }}</p>
+
+{% endblock %}

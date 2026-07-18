@@ -31,11 +31,28 @@
     </footer>
 
     {{ cosmic_scene|default:''|json_script:"cosmic-scene-config" }}
-    <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.x/tsparticles.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.x/tsparticles.bundle.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/@tsparticles/plugin-manual-particles@4/tsparticles.plugin.manualParticles.min.js" defer></script>
     <script src="{% static 'js/cosmic_scene.js' %}" defer></script>
 
     <script>
+      // Dropdown toggle
+      (() => {
+        const dropdown = document.querySelector(".nav-dropdown");
+        const trigger = dropdown?.querySelector(".nav-dropdown-trigger");
+        if (!dropdown || !trigger) return;
+
+        const open  = () => { dropdown.classList.add("is-open");    trigger.setAttribute("aria-expanded", "true");  };
+        const close = () => { dropdown.classList.remove("is-open"); trigger.setAttribute("aria-expanded", "false"); };
+        const toggle = () => dropdown.classList.contains("is-open") ? close() : open();
+
+        trigger.addEventListener("click", (e) => { e.stopPropagation(); toggle(); });
+        document.addEventListener("click", (e) => {
+          if (!dropdown.contains(e.target)) close();
+        });
+        document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
+      })();
+
       // Hide the floating Book button whenever the footer is visible
       (() => {
         const fab = document.getElementById("book-fab");
