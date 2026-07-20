@@ -625,7 +625,7 @@ textarea { min-height: 140px; resize: vertical; }
 
 .constellation-group {
   position: absolute;
-  width: min(280px, 45vw);
+  width: min(220px, 36vw);
   height: min(280px, 45vw);
   transform: translate3d(-50%, calc(-50% + var(--parallax-y, 0px)), 0);
   will-change: transform, opacity;
@@ -1572,10 +1572,13 @@ textarea { min-height: 140px; resize: vertical; }
 
   .page-content { padding: 1.25rem 0 2rem; }
 
+  /* --- Cosmic --- */
+  .constellation-group { width: min(160px, 30vw); }
+
   /* --- CTA pills --- */
 
-  /* Hide the in-column button — the FAB replaces it on mobile */
-  .cta-book { display: none; }
+  /* Hide the home page in-column button — the FAB replaces it on mobile */
+  .home-profile-column .cta-book { display: none; }
 
   /* Floating action button — fixed bottom-right */
   #book-fab {
