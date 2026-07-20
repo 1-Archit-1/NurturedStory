@@ -219,23 +219,32 @@
         // Each preset is an array of {left, top} (in %) — one entry per constellation.
         // Add new presets here; set config.constellation_layout in views.py to switch.
         const PLACEMENT_PRESETS = {
-            // Evenly distributed, alternating left/right (original behaviour)
+            "home":[
+                { left: 85, top: 12 },   // top-right
+                { left: 10, top: 35 },   // upper-centre
+                { left: 19, top: 58 },   // lower-centre
+                { left: 78, top: 78 },   // bottom-left
+            ],
+            // Spacious quad spread — one in each quadrant
             "default": [
-                { left: 20, top: 26 },
-                { left: 80, top: 52 },
-                { left: 20, top: 78 },
+                { left: 18, top: 22 },   // top-left
+                { left: 78, top: 30 },   // top-right
+                { left: 22, top: 70 },   // bottom-left
+                { left: 72, top: 72 },   // bottom-right
             ],
-            // Clustered in the top half, tighter spread
+            // Scattered across top two-thirds, nothing near the bottom edge
             "top-heavy": [
-                { left: 15, top: 12 },
-                { left: 75, top: 22 },
-                { left: 45, top: 38 },
+                { left: 15, top: 19 },   // top-left
+                { left: 78, top: 22 },   // top-right
+                { left: 42, top: 44 },   // centre
+                { left: 20, top: 62 },   // mid-left
             ],
-            // Wide diagonal — bottom-left to top-right
+            // True diagonal sweep — evenly spaced top-right to bottom-left
             "diagonal": [
-                { left: 10, top: 75 },
-                { left: 50, top: 45 },
-                { left: 85, top: 15 },
+                { left: 85, top: 12 },   // top-right
+                { left: 55, top: 35 },   // upper-centre
+                { left: 30, top: 58 },   // lower-centre
+                { left: 12, top: 78 },   // bottom-left
             ],
         };
 
@@ -272,9 +281,21 @@
             const linePairs =
                 constellation.id === "orion"
                     ? [[0, 1], [0, 2], [1, 4], [2, 3], [3, 4], [2, 5], [4, 6], [0, 7], [1, 7]]
-                    : constellation.id === "gemini"
-                        ? [[0, 2], [1, 3], [2, 4], [3, 5], [4, 7], [5, 7], [5, 6], [0, 1]]
-                        : [[0, 1], [1, 2], [2, 3], [3, 0], [3, 4], [4, 5], [5, 6]];
+                    : constellation.id === "nurtured_story"
+                        ? [
+                            [0, 1], [1, 2],           // spine top→mid→bottom
+                            [3, 0], [4, 2], [3, 4],   // left page
+                            [5, 0], [6, 2], [5, 6],   // right page (mirror)
+                          ]
+                        : constellation.id === "canis_major"
+                        ? [
+                            [0,1],     // Muliphein-Sirius-Mirzam (head line)
+                            [0,2],[2,3],[3,4],[2,4],
+                            [0,5],[5,6], //body
+                            [6,7],[6,8],
+                            [8,9]
+                          ]
+                        : [[0, 1], [1, 2], [2, 3], [3, 0], [2, 4], [4, 5], [5, 6]];
 
             linePairs.forEach(([a, b]) => {
                 const from = points[a];
@@ -301,10 +322,35 @@
             });
 
             const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            label.setAttribute("x", `${points[0].x + 5}`);
-            label.setAttribute("y", `${points[0].y + 7}`);
+            const labelX = points[0].x + 5;
+            const labelY = points[0].y + 7;
+            const words = (constellation.label || "").toUpperCase().split(" ");
+
+            if (words.length > 1) {
+                // Two-line label using tspan elements
+                const mid = Math.ceil(words.length / 2);
+                const line1 = words.slice(0, mid).join(" ");
+                const line2 = words.slice(mid).join(" ");
+
+                const span1 = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
+                span1.setAttribute("x", labelX);
+                span1.setAttribute("dy", "0");
+                span1.textContent = line1;
+
+                const span2 = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
+                span2.setAttribute("x", labelX);
+                span2.setAttribute("dy", "10");
+                span2.textContent = line2;
+
+                label.appendChild(span1);
+                label.appendChild(span2);
+            } else {
+                label.textContent = words[0];
+            }
+
+            label.setAttribute("x", `${labelX}`);
+            label.setAttribute("y", `${labelY}`);
             label.setAttribute("class", "constellation-label");
-            label.textContent = (constellation.label || "").toUpperCase();
             svg.appendChild(label);
 
             groupWrapper.appendChild(svg);

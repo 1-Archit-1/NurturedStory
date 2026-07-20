@@ -41,23 +41,46 @@ def build_scene(planets: list[dict], constellation_layout: str = "default") -> d
         "constellation_layout": constellation_layout,
         "constellations": [
             {
+                "id": "nurtured_story",
+                "label": "Nurtured Story",
+                "color": "rgba(200, 220, 255, 0.38)",
+                # 0=spine top, 1=spine middle (binding), 2=spine bottom,
+                # 3=left page top, 4=left page bottom,
+                # 5=right page top, 6=right page bottom
+                "points": [
+                    {"x": 50, "y": 25},
+                    {"x": 50, "y": 50},
+                    {"x": 50, "y": 75},
+                    {"x": 15, "y": 18},
+                    {"x": 15, "y": 82},
+                    {"x": 85, "y": 18},
+                    {"x": 85, "y": 82},
+                ],
+            },
+            {
                 "id": "big_dipper",
                 "label": "Big Dipper",
                 "color": "rgba(180, 210, 255, 0.42)",
+                # Bowl: 0=Phecda (bottom-left), 1=Merak (bottom-right),
+                #       2=Dubhe (top-right, handle join),    3=Megrez (top-left)
+                # Handle: 4=Alioth, 5=Mizar, 6=Alkaid (tip, upper-right)
                 "points": [
-                    {"x": 5,  "y": 20},
-                    {"x": 25, "y": 35},
-                    {"x": 50, "y": 45},
-                    {"x": 40, "y": 65},
-                    {"x": 75, "y": 80},
-                    {"x": 95, "y": 50},
-                    {"x": 80, "y": 25},
+                    {"x": 25, "y": 74},
+                    {"x": 42, "y": 72},
+                    {"x": 48, "y": 52},
+                    {"x": 30, "y": 48},
+                    {"x": 61, "y": 39},
+                    {"x": 72, "y": 22},
+                    {"x": 65, "y": 8},
                 ],
             },
             {
                 "id": "orion",
                 "label": "Orion",
                 "color": "rgba(168, 210, 255, 0.36)",
+                # 0=Betelgeuse (left shoulder), 1=Bellatrix (right shoulder),
+                # 2=Alnitak (belt left), 3=Alnilam (belt centre), 4=Mintaka (belt right),
+                # 5=Saiph (left foot), 6=Rigel (right foot), 7=Meissa (head)
                 "points": [
                     {"x": 10, "y": 15},
                     {"x": 35, "y": 20},
@@ -70,20 +93,28 @@ def build_scene(planets: list[dict], constellation_layout: str = "default") -> d
                 ],
             },
             {
-                "id": "gemini",
-                "label": "Gemini",
+                "id": "canis_major",
+                "label": "Canis Major",
                 "color": "rgba(180, 210, 255, 0.32)",
+                # Dog oriented diagonally — head top-right, body sweeping to bottom-left
+                # 0=Sirius (head, brightest), 1=Mirzam (right of Sirius),
+                # 2=Muliphein (left of Sirius), 3=neck/upper body,
+                # 4=Wezen (lower body), 5=Adhara (hind, bright),
+                # 6=Aludra (tail tip, bottom-left), 7=front leg/paw
                 "points": [
-                    {"x": 20, "y": 10},
-                    {"x": 50, "y": 25},
-                    {"x": 10, "y": 60},
-                    {"x": 40, "y": 65},
-                    {"x": 5,  "y": 95},
-                    {"x": 30, "y": 100},
-                    {"x": 60, "y": 80},
-                    {"x": 40, "y": 5},
+                    {"x": 75, "y": 20}, #Sirius
+                    {"x": 90, "y": 28}, #Mirzam
+                    {"x": 60, "y": 15}, #Front leg
+                    {"x": 54, "y": 10}, #Muliphein
+                    {"x": 62, "y": 3}, #Head of dog
+                    {"x": 60, "y": 45}, #Thanih al Adzari
+                    {"x": 45, "y": 60},#Wezen
+                    {"x": 28, "y": 72},#Aludra
+                    {"x": 55, "y": 75},#Adhara
+                    {"x": 80, "y": 80},#Furud
                 ],
             },
+
         ],
         "planets": planets,
     }
@@ -123,7 +154,7 @@ def home(request: HttpRequest) -> HttpResponse:
                     "neptune": None,
                 }
             ),
-            constellation_layout= 'diagonal'
+            constellation_layout= 'home'
         ),
     }
     return render(request, "pages/home.html", context)
@@ -281,7 +312,8 @@ def licensure(request: HttpRequest) -> HttpResponse:
                     "uranus": None,
                     "neptune": None,
                 }
-            )
+            ),
+            constellation_layout='diagonal'
         ),
     }
     return render(request, "pages/licensure.html", context)
