@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.core.mail import send_mail
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -166,13 +168,39 @@ def pricing(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
         form = ContactForm(request.POST)
         if form.is_valid():
-            # Save submission to the DB so Shel can read it in the admin
+            name    = form.cleaned_data["name"]
+            email   = form.cleaned_data["email"]
+            phone   = form.cleaned_data.get("phone", "")
+            message = form.cleaned_data["message"]
+
+            # Save to DB so it's visible in the admin
             ContactSubmission.objects.create(
-                name=form.cleaned_data["name"],
-                email=form.cleaned_data["email"],
-                phone=form.cleaned_data.get("phone", ""),
-                message=form.cleaned_data["message"],
+                name=name,
+                email=email,
+                phone=phone,
+                message=message,
             )
+
+            # Send notification email
+            phone_line = f"\nPhone: {phone}" if phone else ""
+            try:
+                send_mail(
+                    subject=f"New message from {name} — Nurtured Story",
+                    message=(
+                        f"Name: {name}\n"
+                        f"Email: {email}"
+                        f"{phone_line}\n\n"
+                        f"Message:\n{message}"
+                    ),
+                    from_email=settings.EMAIL_HOST_USER or "noreply@nurturedstory.com",
+                    recipient_list=[settings.CONTACT_RECIPIENT_EMAIL],
+                    fail_silently=False,
+                )
+            except Exception:
+                # Don't let an email failure block the user's submission —
+                # it's already saved to the DB.
+                pass
+
             return redirect(f"{reverse('pricing')}?submitted=1")
     else:
         form = ContactForm()
@@ -297,10 +325,13 @@ def trainings(request: HttpRequest) -> HttpResponse:
 
 
 def licensure(request: HttpRequest) -> HttpResponse:
+    page = LicensurePage.load()
     context = {
         "active_page": "licensure",
         "site": SiteSettings.load(),
-        "page": LicensurePage.load(),
+        "page": page,
+        "consult_booking_message": page.consult_booking_message,
+        "renewal_booking_message": page.renewal_booking_message,
         "cosmic_scene": build_scene(
             solar_planets(
                 {

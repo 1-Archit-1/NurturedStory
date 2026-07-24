@@ -1532,6 +1532,8 @@ textarea { min-height: 140px; resize: vertical; }
     max-width: 120px;
     aspect-ratio: 1 / 1;
     border-radius: 50%;
+    display: block;
+    margin: 0 auto;
   }
 
   .connector-orbit { display: none; }

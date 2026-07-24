@@ -92,38 +92,39 @@
     const rates = JSON.parse(dataEl.textContent);
     const rateMap = Object.fromEntries(rates.map(r => [String(r.id), r]));
 
+    function prefillAndScroll(message) {
+      const messageField = document.getElementById("id_message");
+      const formSection  = document.querySelector("[data-cosmic-anchor='contact-form']");
+
+      if (formSection) {
+        setTimeout(() => {
+          formSection.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 100);
+      }
+
+      if (messageField) {
+        messageField.value = message;
+        messageField.classList.remove("field-highlighted");
+        void messageField.offsetWidth;
+        messageField.classList.add("field-highlighted");
+        setTimeout(() => messageField.classList.remove("field-highlighted"), 1200);
+      }
+    }
+
+    // Pre-fill from ?msg= query param (e.g. navigating from the licensure page)
+    const params = new URLSearchParams(window.location.search);
+    const msgParam = params.get("msg");
+    if (msgParam) {
+      // Small delay so the page has painted before scrolling
+      setTimeout(() => prefillAndScroll(msgParam), 200);
+    }
+
+    // Pre-fill on rate row click
     document.querySelectorAll(".rate-row[data-rate-id]").forEach(row => {
       row.addEventListener("click", () => {
         const rate = rateMap[row.getAttribute("data-rate-id")];
         if (!rate) return;
-
-        // The form may not exist (e.g. after submission — success state shown)
-        const messageField = document.getElementById("id_message");
-        const nameField = document.getElementById("id_name");
-        const formSection  = document.querySelector("[data-cosmic-anchor='contact-form']");
-
-        if (formSection) {
-          // Use a small delay for smoother UX
-          setTimeout(() => {
-            formSection.scrollIntoView({ behavior: "smooth", block: "center" });
-          }, 100);
-        }
-
-        if (messageField) {
-          messageField.value = rate.booking_message;
-          // Delay focus slightly so scroll completes first
-          setTimeout(() => {
-            // Focus on name field instead
-            // if (nameField) {
-            //   nameField.focus();
-            // }
-            messageField.classList.remove("field-highlighted");
-            // Force reflow so the animation restarts if clicked multiple times
-            void messageField.offsetWidth;
-            messageField.classList.add("field-highlighted");
-            setTimeout(() => messageField.classList.remove("field-highlighted"), 1200);
-          }, 300);
-        }
+        prefillAndScroll(rate.booking_message);
       });
     });
   })();

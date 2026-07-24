@@ -22,7 +22,8 @@
       <span class="licensure-rate-label">{{ page.consult_rate_label }}</span>
       <span class="licensure-rate-price">{{ page.consult_rate }}</span>
     </div>
-    <a href="{% url 'pricing' %}" class="cta-book licensure-cta">Book a Consultation</a>
+    <a href="{% url 'pricing' %}?msg={{ consult_booking_message|urlencode }}"
+       class="cta-book licensure-cta">Book a Consultation</a>
   </article>
 
   <article class="section-card info-card info-card-purple" data-cosmic-anchor="licensure-rates">
@@ -32,7 +33,8 @@
       <span class="licensure-rate-label">{{ page.renewal_rate_label }}</span>
       <span class="licensure-rate-price">{{ page.renewal_rate }}</span>
     </div>
-    <a href="{% url 'pricing' %}" class="cta-book licensure-cta">Book a Consultation</a>
+    <a href="{% url 'pricing' %}?msg={{ renewal_booking_message|urlencode }}"
+       class="cta-book licensure-cta">Book a Consultation</a>
   </article>
 
 </section>

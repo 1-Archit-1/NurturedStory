@@ -392,6 +392,17 @@ class LicensurePage(SingletonModel):
     )
     consult_rate_label = models.CharField(max_length=100, default="Consultation Rate")
     consult_rate = models.CharField(max_length=50, default="$50 / hour")
+    consult_booking_message = models.TextField(
+        blank=True,
+        default=(
+            "Hi, I'm interested in booking a Licensure Consultation ($50 / hour). "
+            "Please let me know your availability."
+        ),
+        help_text=(
+            "Pre-filled message inserted into the contact form when a visitor "
+            "clicks 'Book a Consultation' on the Licensure Consultation card."
+        ),
+    )
 
     # CE Renewal card
     renewal_intro = models.TextField(
@@ -405,6 +416,17 @@ class LicensurePage(SingletonModel):
     )
     renewal_rate_label = models.CharField(max_length=100, default="Rate")
     renewal_rate = models.CharField(max_length=50, default="$75")
+    renewal_booking_message = models.TextField(
+        blank=True,
+        default=(
+            "Hi, I'm interested in booking a CE Renewal Consultation ($75). "
+            "Please let me know your availability."
+        ),
+        help_text=(
+            "Pre-filled message inserted into the contact form when a visitor "
+            "clicks 'Book a Consultation' on the CE Renewal card."
+        ),
+    )
 
     # Disclaimer
     disclaimer = models.TextField(
