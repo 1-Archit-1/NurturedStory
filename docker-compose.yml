@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 2 --threads 2
+    volumes:
+      # Only mount the source code — NOT the whole /app dir, which would
+      # overwrite the pip-installed packages baked into the image.
+      - ./static:/app/static
+      - ./templates:/app/templates
+      - ./website:/app/website
+      - ./config:/app/config
+      - ./manage.py:/app/manage.py
+      # Persist the SQLite DB outside the container so it survives rebuilds
+      - sqlite_data:/app/data
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+
+  caddy:
+    image: caddy:2
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+
+volumes:
+  sqlite_data:
+  caddy_data:
+  caddy_config:

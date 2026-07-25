@@ -62,7 +62,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
 
 if DJANGO_ENV == "development":
-    # Local dev: SQLite, no DATABASE_URL needed
+    # Local dev: SQLite at the project root
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -78,13 +78,24 @@ elif DJANGO_ENV == "staging":
         )
     }
 elif DJANGO_ENV == "production":
-    DATABASES = {
-        "default": dj_database_url.config(
-            default=os.environ.get("PRODUCTION_DATABASE_URL"),
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
-    }
+    # If a DATABASE_URL is set, use Postgres; otherwise fall back to SQLite
+    # stored in /app/data/ which is mapped to a named Docker volume.
+    _prod_db_url = os.environ.get("PRODUCTION_DATABASE_URL")
+    if _prod_db_url:
+        DATABASES = {
+            "default": dj_database_url.config(
+                default=_prod_db_url,
+                conn_max_age=600,
+                conn_health_checks=True,
+            )
+        }
+    else:
+        DATABASES = {
+            "default": {
+                "ENGINE": "django.db.backends.sqlite3",
+                "NAME": BASE_DIR / "data" / "db.sqlite3",
+            }
+        }
 else:
     raise ValueError(f"Unknown DJANGO_ENV value: '{DJANGO_ENV}'. Must be development, staging, or production.")
 
