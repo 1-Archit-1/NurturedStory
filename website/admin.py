@@ -49,7 +49,7 @@ class SiteSettingsAdmin(SingletonModelAdmin):
     fieldsets = [
         # Affects: home page hero, header brand name, footer brand name
         ("Practice Info", {
-            "fields": ["practice_name", "tagline", "about_practice"],
+            "fields": ["practice_name", "tagline", "about_practice_heading", "about_practice"],
         }),
         # Affects: pricing page 'Reach Out Directly' card, footer, trainings mailto link
         ("Contact Details", {
@@ -77,7 +77,7 @@ class TherapistProfileAdmin(SingletonModelAdmin):
     fieldsets = [
         # Affects: card heading and credentials line under the name
         ("Identity", {
-            "fields": ["name", "credentials", "photo"],
+            "fields": ["name", "about_heading", "credentials", "photo"],
         }),
         # Affects: the body paragraphs in the teal 'About' card
         ("Bio", {
