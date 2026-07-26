@@ -11,8 +11,6 @@ services:
       - static_files:/app/staticfiles
     env_file:
       - .env
-    ports:
-      - "8000:8000"
 
   caddy:
     image: caddy:2
