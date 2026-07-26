@@ -3,6 +3,7 @@ from django.core.mail import send_mail
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from ratelimit.decorators import ratelimit
 
 from .forms import ContactForm
 from .models import (
@@ -162,12 +163,17 @@ def home(request: HttpRequest) -> HttpResponse:
     return render(request, "pages/home.html", context)
 
 
+@ratelimit(key='ip', rate='5/h', method='POST', block=True)
 def pricing(request: HttpRequest) -> HttpResponse:
     submitted = request.GET.get("submitted") == "1"
 
     if request.method == "POST":
         form = ContactForm(request.POST)
         if form.is_valid():
+            # Honeypot check — silently discard if the hidden field was filled
+            if form.cleaned_data.get("website"):
+                return redirect(f"{reverse('pricing')}?submitted=1")
+
             name    = form.cleaned_data["name"]
             email   = form.cleaned_data["email"]
             phone   = form.cleaned_data.get("phone", "")

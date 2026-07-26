@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "website",
+    "ratelimit",
 ]
 
 MIDDLEWARE = [
@@ -142,3 +143,11 @@ CONTACT_RECIPIENT_EMAIL = os.environ.get(
 # error out on form submission.
 if not EMAIL_HOST_USER:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+# =============================================================================
+# PROXY / RATE LIMITING
+# =============================================================================
+# Trust the X-Forwarded-For header from Traefik (or Caddy) so django-ratelimit
+# sees the real visitor IP rather than the proxy's internal IP.
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

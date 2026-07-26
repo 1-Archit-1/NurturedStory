@@ -65,13 +65,20 @@
       <form method="post" class="contact-form">
         {% csrf_token %}
         {% for field in form %}
-          <div class="form-field">
-            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-            {{ field }}
-            {% if field.errors %}
-              <p class="error">{{ field.errors|striptags }}</p>
-            {% endif %}
-          </div>
+          {% if field.html_name == 'website' %}
+            {# Honeypot — hidden from real users, catches bots #}
+            <div style="position:absolute;left:-9999px;height:0;overflow:hidden" aria-hidden="true">
+              {{ field.label_tag }} {{ field }}
+            </div>
+          {% else %}
+            <div class="form-field">
+              <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {{ field }}
+              {% if field.errors %}
+                <p class="error">{{ field.errors|striptags }}</p>
+              {% endif %}
+            </div>
+          {% endif %}
         {% endfor %}
         <button type="submit" class="submit-btn">Send Message →</button>
       </form>
