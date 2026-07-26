@@ -1,22 +1,10 @@
-# Replace "nurturedstory.com" with your actual domain.
-# Caddy automatically handles HTTPS (Let's Encrypt) when a real domain is set.
+# Replace ":80" with your actual domain for automatic HTTPS via Let's Encrypt.
+# Example: nurturedstory.com {
 #
-# For local testing without a domain, replace the domain with ":80" like this:
-#   :80 {
-#       reverse_proxy web:8000
-#   }
+# For local testing or when SSL is handled upstream, use ":80".
 :80 {
-    # Proxy all requests to the Django/Gunicorn container
+    # Proxy everything (including /static/ and /media/) to Django/Gunicorn.
+    # Static files are baked into the image via collectstatic at build time,
+    # so Django's staticfiles app serves them directly — no separate volume needed.
     reverse_proxy web:8000
-
-    # Serve Django's collected static files directly from Caddy (faster)
-    handle /static/* {
-        root * /app/staticfiles
-        file_server
-    }
-
-    handle /media/* {
-        root * /app/media
-        file_server
-    }
 }
