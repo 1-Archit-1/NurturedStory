@@ -32,7 +32,7 @@
 
   <div class="home-text-column">
     <article class="section-card info-card info-card-purple" data-cosmic-anchor="about-practice">
-      <h2 class="section-header">About the Practice</h2>
+      <h2 class="section-header">{{ site.about_practice_heading|default:"About the Practice" }}</h2>
       {# about_practice supports multiple paragraphs separated by blank lines #}
       {% for paragraph in site.about_practice.splitlines %}
         {% if paragraph.strip %}
@@ -43,7 +43,7 @@
   </div>
 
   <article class="section-card info-card info-card-teal home-about-me" data-cosmic-anchor="about-me">
-    <h2 class="section-header">About {{ therapist.name }}</h2>
+    <h2 class="section-header">{{ therapist.about_heading|default:"About "|add:therapist.name }}</h2>
     <p class="sub-header">{{ therapist.credentials }}</p>
     {# bio supports multiple paragraphs separated by blank lines #}
     {% for paragraph in therapist.bio.splitlines %}

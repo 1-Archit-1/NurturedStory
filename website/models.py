@@ -52,6 +52,11 @@ class SiteSettings(SingletonModel):
         blank=True,
         help_text="The 'About the Practice' blurb shown on the home page.",
     )
+    about_practice_heading = models.CharField(
+        max_length=200,
+        default="About the Practice",
+        help_text="Heading for the 'About the Practice' card on the home page.",
+    )
     sliding_scale_note = models.CharField(
         max_length=300,
         blank=True,
@@ -83,6 +88,12 @@ class TherapistProfile(SingletonModel):
     """
 
     name = models.CharField(max_length=120, default="Shel Pohnan")
+    about_heading = models.CharField(
+        max_length=200,
+        blank=True,
+        default="",
+        help_text="Heading for the 'About' card on the home page. Defaults to 'About {name}' if left blank.",
+    )
     credentials = models.CharField(
         max_length=200,
         blank=True,
