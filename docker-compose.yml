@@ -27,6 +27,7 @@ services:
     depends_on:
       - web
 
+volumes:
   sqlite_data:
   static_files:
   caddy_data:
