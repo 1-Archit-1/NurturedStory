@@ -13,3 +13,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install gunicorn
 
 COPY . /app/
+
+# Collect static files into /app/staticfiles at build time
+# Dummy SECRET_KEY is fine here — collectstatic doesn't need a real one
+RUN DJANGO_ENV=production SECRET_KEY=build-placeholder python manage.py collectstatic --noinput

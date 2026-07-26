@@ -11,12 +11,12 @@
 
     # Serve Django's collected static files directly from Caddy (faster)
     handle /static/* {
-        root * /app
+        root * /app/staticfiles
         file_server
     }
 
     handle /media/* {
-        root * /app
+        root * /app/media
         file_server
     }
 }
