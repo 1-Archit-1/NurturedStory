@@ -3,7 +3,7 @@ from django.core.mail import send_mail
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
-from ratelimit.decorators import ratelimit
+from django_ratelimit.decorators import ratelimit
 
 from .forms import ContactForm
 from .models import (
