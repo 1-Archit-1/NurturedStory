@@ -1,0 +1,374 @@
+[
+{
+  "model": "website.sitesettings",
+  "pk": 1,
+  "fields": {
+    "practice_name": "The Nurtured Story Approach",
+    "tagline": "Relational and Sex Counseling",
+    "phone": "470-599-5630",
+    "email": "shel@nurturedstory.com",
+    "about_practice": "The Nurtured Story approach utilizes narrative therapy to explore, understand and reauthor the difficult stories influencing your relationships and sex life.\r\nUsing a mix of exploratory conversation, metaphor, art therapy (if you are into that), humor, and skill building. We will explore dominant narrative of you life. \r\nDominant narratives are influenced by the stories that shine the brightest in the constellation of our lives. We will work together to identify multiple stars in the solar systems of you to create new, better fitting constellations.\r\n\r\nThis approach was developed to support people with underrepresented stories; queer, neurodivergent, polyamorous or anyone a grandpa might define as \"a little different.\" We don't believe you need to \"fit in\" but rather we want to support you in finding the place you fit.\r\n\r\nIn person and virtual service are available to all Georgia residents, with our in person space located in Decatur, GA. Counseling is Provided through Atlanta Therapeutic Collective by Shel Pohnan, APC",
+    "about_practice_heading": "About the Practice",
+    "sliding_scale_note": "✦ Sliding scale available — reach out to discuss what works for you.",
+    "footer_text": "Copyright 2026 Nurtured Story"
+  }
+},
+{
+  "model": "website.therapistprofile",
+  "pk": 1,
+  "fields": {
+    "name": "Shel Pohnan",
+    "about_heading": "",
+    "credentials": "APC · Sex Therapist",
+    "bio": "Neurodivergent counselor with a special interest in sexuality and relationships. I spent a summer studying human sexuality at the University of Amsterdam, exploring sexuality through social, cultural, and interdisciplinary perspectives. That experience, along with my clinical training, continues to shape the way I approach conversations about desire, identity, pleasure, and connection. Sex and relationships conversations should be approached with be curiously, honesty, and authenticity—without fear of judgment.\r\n\r\nI believe therapy works best when people are genuinely at ease. In my office we are curled up or criss cross on the couch, fidget buffet within arms reach, and shoes optional. Get comfortable to sit in discomfort. Discover a space where nothing is too awkward or \"too much\" to talk about. \r\nMy clients would describe me as grounded and comforting while also providing structure and challenging the problems without shaming or blaming the individual. It's like Animal Crossing met the Oregon Trail, don't worry though we have treatment or dysentery.\r\n\r\nI am under clinical direction by Courtney Geter, LMFTS, CSTS and Supervision by Mary Chase Mize, LPC, CPCS. All therapy is given through Atlanta Therapeutic Collective",
+    "photo": ""
+  }
+},
+{
+  "model": "website.service",
+  "pk": 8,
+  "fields": {
+    "label": "Individual Sex Therapy",
+    "category": "Individual Sex Therapy",
+    "blurb": "Help with sex anxiety\nDifficulty enjoying sex\nPainful sex\nSex with chronic illness or chronic pain\nSex with HIV or herpes",
+    "order": 1,
+    "is_active": true
+  }
+},
+{
+  "model": "website.service",
+  "pk": 9,
+  "fields": {
+    "label": "Individual Relationship Therapy",
+    "category": "Individual Relationship Therapy",
+    "blurb": "Difficulty making or maintaining relationships\nInability to feel secure in relationships\nTrouble navigating the dating scene and forming meaningful connections\nCommunication issues leading to loneliness or feeling misunderstood",
+    "order": 2,
+    "is_active": true
+  }
+},
+{
+  "model": "website.service",
+  "pk": 10,
+  "fields": {
+    "label": "LGBTQIA+ Affirming Therapy",
+    "category": "LGBTQIA+ Affirming Therapy",
+    "blurb": "Identity exploration\nSexuality exploration\nSex and relationship therapy for queer individuals and couples\nIntersex-affirming individual and sex therapy",
+    "order": 6,
+    "is_active": true
+  }
+},
+{
+  "model": "website.service",
+  "pk": 11,
+  "fields": {
+    "label": "Polyamory & Ethical Non-Monogamy (ENM) Relationship Therapy",
+    "category": "Polyamory & Ethical Non-Monogamy (ENM) Relationship Therapy",
+    "blurb": "Support for individuals who are in or considering ENM relationships\nManaging jealousy\nDeconstructing monogamous relationship norms\nTherapy for couples, triads, and polycules",
+    "order": 5,
+    "is_active": true
+  }
+},
+{
+  "model": "website.service",
+  "pk": 12,
+  "fields": {
+    "label": "Neurodivergent-Affirming Therapy",
+    "category": "Neurodivergent-Affirming Therapy",
+    "blurb": "Helping clients unmask and live more authentically\nImproving communication skills to strengthen relationships\nSupport for parents of neurodivergent children\nCouples or sex therapy to help partners navigate and better understand neurodivergent differences",
+    "order": 7,
+    "is_active": true
+  }
+},
+{
+  "model": "website.service",
+  "pk": 13,
+  "fields": {
+    "label": "Couples Therapy",
+    "category": "Couples Therapy",
+    "blurb": "Difficulties communicating\nGetting caught in unproductive relationship patterns\nNavigating differences in healthy, collaborative ways\nDecrease the effects of negative or unproductive cycles",
+    "order": 4,
+    "is_active": true
+  }
+},
+{
+  "model": "website.service",
+  "pk": 14,
+  "fields": {
+    "label": "Couples Sex Therapy",
+    "category": "Couples Sex Therapy",
+    "blurb": "Differences in sexual desire or sexual experience\nSexless relationships\nDifficulty discussing sex\nAsexual-affirming couples therapy\nNavigating painful intercourse as a couple",
+    "order": 3,
+    "is_active": true
+  }
+},
+{
+  "model": "website.sessionrate",
+  "pk": 1,
+  "fields": {
+    "session_type": "Individual Session",
+    "duration_minutes": 60,
+    "price": "150.00",
+    "note": "",
+    "booking_message": "",
+    "order": 0,
+    "is_active": true
+  }
+},
+{
+  "model": "website.sessionrate",
+  "pk": 2,
+  "fields": {
+    "session_type": "Couples Session",
+    "duration_minutes": 60,
+    "price": "150.00",
+    "note": "",
+    "booking_message": "",
+    "order": 1,
+    "is_active": true
+  }
+},
+{
+  "model": "website.resourcecategory",
+  "pk": 1,
+  "fields": {
+    "name": "Narrative Resources",
+    "emoji": "📖",
+    "description": "Narrative therapy invites us to separate our identity from our problems, recognizing that we are not our struggles and we can re-author our story.",
+    "order": 3,
+    "is_active": true
+  }
+},
+{
+  "model": "website.resourcecategory",
+  "pk": 2,
+  "fields": {
+    "name": "Relationship and Couples",
+    "emoji": "💫",
+    "description": "Healthy relationships grow through communication, trust, and repair. Support can help partners move from conflict cycles to connection.",
+    "order": 0,
+    "is_active": true
+  }
+},
+{
+  "model": "website.resourcecategory",
+  "pk": 3,
+  "fields": {
+    "name": "Sex and Intimacy",
+    "emoji": "🌹",
+    "description": "Sexual health is relevant throughout a person’s life. It is determined by the quality and safety of people’s relationships: with oneself and other individuals, family, friends, and the society in which we live. Great sex starts with great safety.",
+    "order": 1,
+    "is_active": true
+  }
+},
+{
+  "model": "website.resourcecategory",
+  "pk": 4,
+  "fields": {
+    "name": "Poly and Non-Monogamy",
+    "emoji": "♾️",
+    "description": "Ethical non-monogamy includes many valid structures. Affirming support helps with clarity, agreements, and emotional skill building.",
+    "order": 2,
+    "is_active": true
+  }
+},
+{
+  "model": "website.resourcelink",
+  "pk": 1,
+  "fields": {
+    "category": 3,
+    "title": "Sensate Focus Touch Detailed guide",
+    "url": "https://www.stanfordcouplescounseling.com/sensate-focus-how-to-restart-intimacy/",
+    "file": "",
+    "description": "Reconnect and quiet sex anxiety",
+    "order": 1,
+    "is_active": true
+  }
+},
+{
+  "model": "website.resourcelink",
+  "pk": 2,
+  "fields": {
+    "category": 3,
+    "title": "Emily Nagoski's Worksheets (Come As You Are)",
+    "url": "https://www.emilynagoski.com/come-as-you-are-worksheets",
+    "file": "",
+    "description": "",
+    "order": 3,
+    "is_active": true
+  }
+},
+{
+  "model": "website.resourcelink",
+  "pk": 3,
+  "fields": {
+    "category": 3,
+    "title": "A Woman's Touch Sexuality Resource Center",
+    "url": "https://sexualityresources.com/",
+    "file": "",
+    "description": "",
+    "order": 4,
+    "is_active": true
+  }
+},
+{
+  "model": "website.resourcelink",
+  "pk": 4,
+  "fields": {
+    "category": 3,
+    "title": "Outercourse",
+    "url": "",
+    "file": "",
+    "description": "Fun without penetration!",
+    "order": 5,
+    "is_active": true
+  }
+},
+{
+  "model": "website.resourcelink",
+  "pk": 5,
+  "fields": {
+    "category": 2,
+    "title": "Relationship Check-in RADAD",
+    "url": "https://www.multiamory.com/radar",
+    "file": "",
+    "description": "",
+    "order": 0,
+    "is_active": true
+  }
+},
+{
+  "model": "website.resourcelink",
+  "pk": 6,
+  "fields": {
+    "category": 4,
+    "title": "Communicating needs and negotiating boundaries",
+    "url": "https://findpoly.com/blog/polyamory-and-negotiation/",
+    "file": "",
+    "description": "",
+    "order": 0,
+    "is_active": true
+  }
+},
+{
+  "model": "website.resourcelink",
+  "pk": 7,
+  "fields": {
+    "category": 4,
+    "title": "Types of Non-monogamy",
+    "url": "https://www.obsidianfields.com/lj/nonmonogamy3-large.png",
+    "file": "",
+    "description": "",
+    "order": 0,
+    "is_active": true
+  }
+},
+{
+  "model": "website.resourcelink",
+  "pk": 8,
+  "fields": {
+    "category": 3,
+    "title": "Sensate Focused Touch info-graphic",
+    "url": "",
+    "file": "resources/Sensate_focused_Touch_1.pdf",
+    "description": "",
+    "order": 2,
+    "is_active": true
+  }
+},
+{
+  "model": "website.resourcelink",
+  "pk": 9,
+  "fields": {
+    "category": 3,
+    "title": "Sexual Pain guide for Partners",
+    "url": "",
+    "file": "resources/PVD_partner_responses_brochure.pdf",
+    "description": "Discover helpful way to help your partner experiencing pain with sex",
+    "order": 6,
+    "is_active": true
+  }
+},
+{
+  "model": "website.resourcelink",
+  "pk": 10,
+  "fields": {
+    "category": 1,
+    "title": "The Dulwich Center",
+    "url": "https://dulwichcentre.com.au/",
+    "file": "",
+    "description": "learn all about narrative therapy",
+    "order": 0,
+    "is_active": true
+  }
+},
+{
+  "model": "website.resourcelink",
+  "pk": 11,
+  "fields": {
+    "category": 2,
+    "title": "Restorative Justice Conversations",
+    "url": "",
+    "file": "resources/Restorative_justice_conversations_Jej4LpW.pdf",
+    "description": "From Polywise chapter 4",
+    "order": 0,
+    "is_active": true
+  }
+},
+{
+  "model": "website.resourcelink",
+  "pk": 12,
+  "fields": {
+    "category": 2,
+    "title": "Codependent Behaviors",
+    "url": "",
+    "file": "resources/Co_dependent_and_independent_behaviors.pdf",
+    "description": "From Polywise by David Cooley and Jessica Fern",
+    "order": 0,
+    "is_active": true
+  }
+},
+{
+  "model": "website.resourcelink",
+  "pk": 13,
+  "fields": {
+    "category": 4,
+    "title": "Building a Poly Relationship",
+    "url": "",
+    "file": "resources/Building_A_Polyamorous_Relationship_Handout_Set.pdf",
+    "description": "",
+    "order": 0,
+    "is_active": true
+  }
+},
+{
+  "model": "website.resourcelink",
+  "pk": 14,
+  "fields": {
+    "category": 1,
+    "title": "What is Narrative Therapy",
+    "url": "https://www.groundfireccw.ca/narrative-therapy",
+    "file": "",
+    "description": "",
+    "order": 0,
+    "is_active": true
+  }
+},
+{
+  "model": "website.licensurepage",
+  "pk": 1,
+  "fields": {
+    "page_title": "Georgia LPC/APC Licensure  Consultation",
+    "page_lede": "Support for counselors-in-training and associate-level clinicians",
+    "consult_intro": "Navigating the LPC/APC licensure process can feel overwhelming, especially when trying to understand application requirements, documentation, supervision requirements, and renewal processes. I offer consultation to help counselors-in-training and associate-level clinicians better understand and navigate the Georgia licensure process.",
+    "consult_items": "Guidance on the Georgia LPC/APC application process\r\nReviewing application requirements and documentation\r\nSupport with understanding supervision requirements\r\nAssistance navigating the renewal process / CE requirements\r\nGeneral guidance on maintaining licensure requirements",
+    "consult_rate_label": "Consultation Rate",
+    "consult_rate": "$50 / hour",
+    "consult_booking_message": "Hi, I'm interested in booking a Licensure Consultation ($50 / hour). Please let me know your availability.",
+    "renewal_intro": "This consultation includes a review of your current continuing education (CE) credits, a detailed report outlining any remaining CE requirements, and a curated list of available CE opportunities to help you complete your renewal requirements.",
+    "renewal_rate_label": "Rate",
+    "renewal_rate": "$75",
+    "renewal_booking_message": "Hi, I'm interested in booking a CE Renewal Consultation ($75). Please let me know your availability.",
+    "disclaimer": "This service does not constitute legal advice and is intended to provide support and clarification throughout the licensure and renewal process. It does not replace guidance from the Georgia Composite Board, and applicants are responsible for ensuring they meet all current licensure requirements."
+  }
+}
+]
