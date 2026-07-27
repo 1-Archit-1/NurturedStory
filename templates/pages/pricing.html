@@ -56,6 +56,13 @@
     <h2 class="section-header">Send a Message</h2>
     <p class="contact-form-intro">Prefer to write? Fill this out and I'll be in touch within one business day.</p>
 
+    {% if rate_limited %}
+      <div class="form-alert form-alert-error">
+        You've sent a few messages recently — please wait an hour before trying again.
+        Or reach out directly by phone or email instead.
+      </div>
+    {% endif %}
+
     {% if submitted %}
       <div class="success-state">
         <div class="success-emoji">🌿</div>

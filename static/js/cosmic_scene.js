@@ -8,6 +8,9 @@
         return;
     }
 
+    // Respect prefers-reduced-motion — skip all JS animation work entirely
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
     let config;
     try {
         config = JSON.parse(configEl.textContent || "{}");
@@ -447,10 +450,14 @@
         drawPlanets();
         drawConstellations();
         refreshParallaxTargets();
-        
-        initParallax();
+
+        if (!prefersReducedMotion) {
+            initParallax();
+        }
+
         // Check repeatedly until tsParticles is loaded from the CDN
         const initParticles = () => {
+            if (prefersReducedMotion) return; // skip particle system entirely
             if (typeof window.tsParticles !== "undefined") {
                 void loadScene();
             } else {
@@ -461,19 +468,15 @@
         initParticles();
     };
     render();
-    // Add interactive hover effect for constellations
+    // Add interactive hover effect for constellations (skip if reduced motion)
+    if (!prefersReducedMotion) {
     window.addEventListener("mousemove", (e) => {
         const groups = document.querySelectorAll(".constellation-group");
         groups.forEach((group) => {
             const rect = group.getBoundingClientRect();
-            // Calculate center of the constellation
             const centerX = rect.left + rect.width / 2;
             const centerY = rect.top + rect.height / 2;
-            
-            // Calculate distance from mouse to center
             const distance = Math.hypot(e.clientX - centerX, e.clientY - centerY);
-
-            // Light up if mouse is within 250px
             if (distance < 250) { 
                 group.classList.add("is-lit");
             } else {
@@ -481,6 +484,7 @@
             }
         });
     });
+    }
     let resizeTimer;
     let lastResizeWidth = window.innerWidth;
     window.addEventListener("resize", () => {

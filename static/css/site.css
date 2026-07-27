@@ -1713,3 +1713,68 @@ textarea { min-height: 140px; resize: vertical; }
 
   .modal-close { right: 0.75rem; top: 0.6rem; font-size: 1.25rem; width: 30px; height: 30px; }
 }
+
+/* =============================================================================
+   FORM ALERTS
+============================================================================= */
+
+.form-alert {
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.form-alert-error {
+  background: rgba(255, 80, 80, 0.1);
+  border: 1px solid rgba(255, 100, 100, 0.35);
+  color: var(--error);
+}
+
+/* =============================================================================
+   REDUCED MOTION
+   Respects prefers-reduced-motion for accessibility and low-powered devices.
+   Disables animations, parallax transitions, and backdrop-filter blur.
+============================================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  /* Kill all CSS animations and transitions */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  /* Freeze planets and constellations in place */
+  .cosmic-planet       { animation: none; opacity: 0.75; }
+  .constellation-group { animation: none; opacity: 0.4; }
+  .cosmic-scene        { animation: none; opacity: 1; }
+
+  /* Disable parallax CSS transitions on planet wraps */
+  .cosmic-planet-wrap  { transition: none; }
+
+  /* Replace backdrop-filter blur with solid background fallback
+     (blur is GPU-only and has no CPU fallback — it just disappears) */
+  .site-header {
+    backdrop-filter: none;
+    background: rgba(8, 12, 25, 0.94);
+  }
+
+  .section-card {
+    backdrop-filter: none;
+    background: rgba(16, 18, 38, 0.96);
+  }
+
+  /* Scroll behaviour */
+  html { scroll-behavior: auto; }
+}
+
+/* Backdrop-filter fallback for browsers that don't support it at all */
+@supports not (backdrop-filter: blur(1px)) {
+  .site-header  { background: rgba(8, 12, 25, 0.94); }
+  .section-card { background: rgba(16, 18, 38, 0.96); }
+}

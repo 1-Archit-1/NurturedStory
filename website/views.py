@@ -163,11 +163,12 @@ def home(request: HttpRequest) -> HttpResponse:
     return render(request, "pages/home.html", context)
 
 
-@ratelimit(key='ip', rate='5/h', method='POST', block=True)
+@ratelimit(key='ip', rate='5/h', method='POST', block=False)
 def pricing(request: HttpRequest) -> HttpResponse:
     submitted = request.GET.get("submitted") == "1"
+    rate_limited = getattr(request, 'limited', False)
 
-    if request.method == "POST":
+    if request.method == "POST" and not rate_limited:
         form = ContactForm(request.POST)
         if form.is_valid():
             # Honeypot check — silently discard if the hidden field was filled
@@ -233,6 +234,7 @@ def pricing(request: HttpRequest) -> HttpResponse:
         "active_page": "pricing",
         "form": form,
         "submitted": submitted,
+        "rate_limited": rate_limited,
         # Singleton — phone, email, sliding scale note
         "site": SiteSettings.load(),
         # Active session rates in display order
