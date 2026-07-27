@@ -11,6 +11,51 @@
     // Respect prefers-reduced-motion — skip all JS animation work entirely
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+    // Runtime perf monitor — runs *during* real animation load, not on an empty page.
+    // Watches for stutter frames (>50ms = below 20fps) over 3 seconds after render.
+    // If stutter frames make up >10% of measured frames, switch to low-perf mode.
+    const monitorPerfDuringAnimations = () => {
+        let stutters = 0;
+        let total = 0;
+        let lastTime = performance.now();
+        const start = lastTime;
+        const worstFrames = [];
+
+        const tick = (now) => {
+            const delta = now - lastTime;
+            lastTime = now;
+            total++;
+            if (delta > 50) {
+                stutters++;
+                worstFrames.push(delta);
+            }
+            if (now - start < 3000) {
+                requestAnimationFrame(tick);
+            } else {
+                const stutterRate = stutters / total;
+                console.log(
+                    "[cosmic] perf monitor —",
+                    "frames:", total,
+                    "stutters:", stutters,
+                    "rate:", (stutterRate * 100).toFixed(1) + "%",
+                    "worst:", worstFrames.length ? Math.max(...worstFrames).toFixed(1) + "ms" : "none",
+                );
+                if (stutterRate > 0.1) {
+                    console.log("[cosmic] switching to low-perf mode");
+                    document.documentElement.classList.add("low-perf");
+
+                    // Reload tsParticles with a lightweight config (60 particles instead of 420,
+                    // no per-particle opacity animation, 30fps cap)
+                    if (window.tsParticles && typeof window.tsParticles.dom === "function") {
+                        window.tsParticles.dom().forEach(instance => instance.destroy());
+                        void loadScene({ lowPerf: true });
+                    }
+                }
+            }
+        };
+        requestAnimationFrame(tick);
+    };
+
     let config;
     try {
         config = JSON.parse(configEl.textContent || "{}");
@@ -361,20 +406,20 @@
         });
     };
 
-    const loadScene = async () => {
+    const loadScene = async (options = {}) => {
         if (typeof window.tsParticles === "undefined") return;
 
-        // FIX 3: Removed manualParticles completely to prevent the Slim bundle from crashing.
-        // Using the robust standard configuration syntax.
+        const isLowPerf = options.lowPerf || false;
+
         await window.tsParticles.load({
             id: "cosmic-stars",
             options: {
                 fullScreen: { enable: false },
-                detectRetina: true,
+                detectRetina: !isLowPerf,   // skip retina scaling on low-perf
                 fpsLimit: 60,
                 particles: {
                     number: {
-                        value: Number(config.stars) || 420,
+                        value: isLowPerf ? 60 : (Number(config.stars) || 300),
                         density: { enable: true, width: 1920, height: 1080 },
                     },
                     color: { value: ["#ffffff", "#dbe6ff", "#c8b8e8"] },
@@ -382,12 +427,15 @@
                         enable: true,
                         direction: "none",
                         random: true,
-                        speed: 0.15, // Slow, ambient float
+                        speed: 0.15,
                         outModes: { default: "out" },
                     },
                     opacity: {
                         value: { min: 0.2, max: 0.9 },
-                        animation: { enable: true, speed: 0.5, sync: false },
+                        // Per-particle opacity animation is expensive without GPU — skip it in low-perf
+                        animation: isLowPerf
+                            ? { enable: false }
+                            : { enable: true, speed: 0.5, sync: false },
                     },
                     shape: { type: "circle" },
                     size: { value: { min: 0.4, max: 1.4 } },
@@ -451,25 +499,30 @@
         drawConstellations();
         refreshParallaxTargets();
 
-        if (!prefersReducedMotion) {
-            initParallax();
+        // If user explicitly wants reduced motion, skip everything
+        if (prefersReducedMotion) {
+            document.documentElement.classList.add("low-perf");
+            return;
         }
+
+        initParallax();
 
         // Check repeatedly until tsParticles is loaded from the CDN
         const initParticles = () => {
-            if (prefersReducedMotion) return; // skip particle system entirely
             if (typeof window.tsParticles !== "undefined") {
                 void loadScene();
             } else {
-                setTimeout(initParticles, 50); // check again in 50ms
+                setTimeout(initParticles, 50);
             }
         };
-
         initParticles();
+
+        // Start perf monitoring under real animation load. If jank detected,
+        // .low-perf class gets added and CSS animations freeze.
+        monitorPerfDuringAnimations();
     };
     render();
-    // Add interactive hover effect for constellations (skip if reduced motion)
-    if (!prefersReducedMotion) {
+    // Add interactive hover effect for constellations
     window.addEventListener("mousemove", (e) => {
         const groups = document.querySelectorAll(".constellation-group");
         groups.forEach((group) => {
@@ -484,7 +537,6 @@
             }
         });
     });
-    }
     let resizeTimer;
     let lastResizeWidth = window.innerWidth;
     window.addEventListener("resize", () => {

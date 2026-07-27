@@ -1293,7 +1293,8 @@ textarea { min-height: 140px; resize: vertical; }
   width: 100%;
   display: flex;
   flex-direction: column;
-  transition: transform 180ms ease, box-shadow 180ms ease;
+  transition: transform 100ms cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 100ms ease;
 }
 
 .resource-card .tagline { flex: 1; font-size: 1rem; }
@@ -1351,20 +1352,13 @@ textarea { min-height: 140px; resize: vertical; }
 .resource-modal-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(5, 8, 20, 0.84);
-  backdrop-filter: blur(8px);
+  background: rgba(5, 8, 20, 0.92);
   animation: backdropFadeIn 300ms ease-out forwards;
 }
 
 @keyframes backdropFadeIn {
-  from {
-    opacity: 0;
-    backdrop-filter: blur(0px);
-  }
-  to {
-    opacity: 1;
-    backdrop-filter: blur(8px);
-  }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 .resource-modal-card {
@@ -1778,3 +1772,46 @@ textarea { min-height: 140px; resize: vertical; }
   .site-header  { background: rgba(8, 12, 25, 0.94); }
   .section-card { background: rgba(16, 18, 38, 0.96); }
 }
+
+/* =============================================================================
+   LOW-PERF MODE
+   Applied via JS when frame rate can't sustain 30fps (hardware accel disabled,
+   weak GPU, throttled CPU). Kills animations and expensive effects.
+============================================================================= */
+
+/* Smooth crossfade when switching to .low-perf mode.
+   Transitions are added only for properties that change — hover transitions
+   on individual elements are left untouched (they're in their own rules). */
+.site-header       { transition: backdrop-filter 400ms ease, background 400ms ease; }
+.section-card      { transition: backdrop-filter 400ms ease, background 400ms ease,
+                                border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease; }
+.cosmic-sun-arc    { transition: opacity 400ms ease; }
+.cosmic-scene      { transition: opacity 400ms ease; }
+/* Planets and constellations already have shorter hover transitions —
+   apply the longer 400ms opacity transition only when .low-perf is being added */
+.low-perf .cosmic-planet,
+.low-perf .constellation-group {
+  transition: opacity 400ms ease !important;
+}
+
+/* Disable backdrop-filter blur — main GPU-bound offender */
+.low-perf .site-header {
+  backdrop-filter: none;
+  background: rgba(8, 12, 25, 0.94);
+}
+
+.low-perf .section-card {
+  backdrop-filter: none;
+  background: rgba(16, 18, 38, 0.96);
+}
+
+.low-perf .resource-modal-backdrop { animation: none; }
+.low-perf .resource-modal-card { animation: none; }
+
+/* Stop breathing animations on planets and constellations —
+   opacity changes across many elements every frame are cheap with GPU
+   compositing but expensive without */
+.low-perf .cosmic-planet       { animation: none; opacity: 0.85; }
+.low-perf .constellation-group { animation: none; opacity: 0.55; }
+.low-perf .cosmic-sun-arc      { animation: none; }
+.low-perf .cosmic-scene        { animation: none; opacity: 1; }
