@@ -492,3 +492,93 @@ class ContactSubmission(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.email}) — {self.submitted_at:%Y-%m-%d %H:%M}"
+
+
+# ---------------------------------------------------------------------------
+# SEO
+# ---------------------------------------------------------------------------
+
+PAGE_CHOICES = [
+    ("home",      "Home"),
+    ("pricing",   "Pricing"),
+    ("resources", "Resources"),
+    ("trainings", "Trainings"),
+    ("licensure", "Licensure"),
+]
+
+
+class PageSEO(models.Model):
+    """
+    Per-page SEO settings — one row per page.
+
+    Controls what Google shows in search results for each page:
+      - meta_title       → overrides the browser tab title for SEO (leave blank to use page default)
+      - meta_description → the snippet shown under the title in search results (max 160 chars)
+
+    The 'page' field identifies which page this row belongs to.
+    Exactly one row per page is expected.
+    """
+
+    page = models.CharField(
+        max_length=20,
+        choices=PAGE_CHOICES,
+        unique=True,
+        help_text="Which page these SEO settings apply to.",
+    )
+    meta_title = models.CharField(
+        max_length=70,
+        blank=True,
+        default="",
+        help_text=(
+            "Browser tab title and Google headline. Keep under 70 characters. "
+            "Leave blank to use the page's default title."
+        ),
+    )
+    meta_description = models.CharField(
+        max_length=160,
+        blank=True,
+        default="",
+        help_text=(
+            "Shown under the page title in Google search results. "
+            "Keep under 160 characters."
+        ),
+    )
+
+    class Meta:
+        verbose_name = "Page SEO"
+        verbose_name_plural = "Page SEO"
+        ordering = ["page"]
+
+    def __str__(self):
+        return f"SEO — {self.get_page_display()}"
+
+
+class LocalBusinessSEO(SingletonModel):
+    """
+    Structured data for Google rich results — one row, always.
+
+    This data is embedded as invisible JSON-LD in every page's <head>.
+    Google reads it to power knowledge panels, map listings, and rich results.
+
+    Keep this in sync with your Google Business Profile.
+    """
+
+    city = models.CharField(
+        max_length=100,
+        blank=True,
+        default="Decatur",
+        help_text="City where sessions are offered in person, e.g. 'Decatur'",
+    )
+    state = models.CharField(
+        max_length=50,
+        blank=True,
+        default="GA",
+        help_text="State abbreviation, e.g. 'GA'",
+    )
+
+    class Meta:
+        verbose_name = "Local Business SEO"
+        verbose_name_plural = "Local Business SEO"
+
+    def __str__(self):
+        return "Local Business SEO"

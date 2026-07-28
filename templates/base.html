@@ -5,7 +5,53 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="dark" />
-    <title>{% block title %}{{ site.practice_name|default:"Nurtured Story" }}{% endblock %}</title>
+    <title>{% block title %}{{ page_seo.meta_title|default:site.practice_name|default:"Nurtured Story" }}{% endblock %}</title>
+
+    {# --- Meta description (overridable per page, or via Site Settings in admin) --- #}
+    <meta name="description" content="{% block meta_description %}{{ page_seo.meta_description|default:"Relational therapy and sex counseling through Nurtured Story — in person in the Atlanta area (Decatur, GA) and virtual therapy across Georgia. Narrative-based, affirming approach." }}{% endblock %}" />
+
+    {# --- Canonical URL (overridable per page) --- #}
+    <link rel="canonical" href="{{ SITE_URL }}{% block canonical_path %}{{ request.path }}{% endblock %}" />
+
+    {# --- Open Graph / social sharing --- #}
+    <meta property="og:type"        content="website" />
+    <meta property="og:site_name"   content="{{ site.practice_name|default:'Nurtured Story' }}" />
+    <meta property="og:title"       content="{% block og_title %}{{ page_seo.meta_title|default:site.practice_name|default:'Nurtured Story' }}{% endblock %}" />
+    <meta property="og:description" content="{% block og_description %}{{ page_seo.meta_description|default:"Relational therapy and sex counseling through Nurtured Story — in person in the Atlanta area (Decatur, GA) and virtual therapy across Georgia. Narrative-based, affirming approach." }}{% endblock %}" />
+    <meta property="og:url"         content="{{ SITE_URL }}{{ request.path }}" />
+    <meta property="og:image"       content="{{ SITE_URL }}{% static 'shel-image.avif' %}" />
+    <meta name="twitter:card"       content="summary_large_image" />
+
+    {# --- Structured data (JSON-LD) — read by Google, invisible to users --- #}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "{{ site.practice_name|default:'Nurtured Story' }}",
+      "description": "{{ site.meta_description|default:'Relational therapy and sex counseling through Nurtured Story' }}",
+      "url": "{{ SITE_URL }}/",
+      "telephone": "{{ site.phone|default:'470-599-5630' }}",
+      "email": "{{ site.email|default:'shel@nurturedstory.com' }}",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "{{ site.city|default:'Decatur' }}",
+        "addressRegion": "{{ site.state|default:'GA' }}",
+        "addressCountry": "US"
+      },
+      "areaServed": [
+        { "@type": "City", "name": "Decatur, GA" },
+        { "@type": "City", "name": "Atlanta, GA" },
+        { "@type": "State", "name": "Georgia" }
+      ]
+    }
+    </script>
+
+    {# --- Favicon (place favicon.ico / favicon.svg in static/) --- #}
+    <link rel="icon" href="{% static 'favicon/favicon.ico' %}" sizes="any" />
+    <link rel="icon" href="{% static 'favicon/favicon.svg' %}" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="{% static 'favicon/apple-touch-icon.png' %}" />
+    <link rel="manifest" href="{% static 'favicon/site.webmanifest' %}" />
+
     <link rel="stylesheet" href="{% static 'css/site.css' %}" />
   </head>
   <body>

@@ -9,6 +9,8 @@ from .forms import ContactForm
 from .models import (
     ContactSubmission,
     LicensurePage,
+    LocalBusinessSEO,
+    PageSEO,
     ResourceCategory,
     Service,
     SessionRate,
@@ -140,7 +142,7 @@ def solar_planets(anchor_map: dict[str, str | None]) -> list[dict]:
 def home(request: HttpRequest) -> HttpResponse:
     context = {
         "active_page": "home",
-        # Singleton — always one row; .load() creates it if missing
+        "page_seo": PageSEO.objects.filter(page="home").first(),
         "site": SiteSettings.load(),
         "therapist": TherapistProfile.load(),
         # Only active services, already ordered by `order` field
@@ -232,6 +234,7 @@ def pricing(request: HttpRequest) -> HttpResponse:
 
     context = {
         "active_page": "pricing",
+        "page_seo": PageSEO.objects.filter(page="pricing").first(),
         "form": form,
         "submitted": submitted,
         "rate_limited": rate_limited,
@@ -287,6 +290,7 @@ def resources(request: HttpRequest) -> HttpResponse:
 
     context = {
         "active_page": "resources",
+        "page_seo": PageSEO.objects.filter(page="resources").first(),
         "resources": resources_data,
         "cosmic_scene": build_scene(
             solar_planets(
@@ -310,7 +314,7 @@ def trainings(request: HttpRequest) -> HttpResponse:
 
     context = {
         "active_page": "trainings",
-        # site.email used for the 'Get in Touch' mailto link
+        "page_seo": PageSEO.objects.filter(page="trainings").first(),
         "site": SiteSettings.load(),
         "trainings": published_trainings,
         # Template uses this flag to decide between listing cards or placeholder
@@ -336,6 +340,7 @@ def licensure(request: HttpRequest) -> HttpResponse:
     page = LicensurePage.load()
     context = {
         "active_page": "licensure",
+        "page_seo": PageSEO.objects.filter(page="licensure").first(),
         "site": SiteSettings.load(),
         "page": page,
         "consult_booking_message": page.consult_booking_message,
@@ -356,3 +361,24 @@ def licensure(request: HttpRequest) -> HttpResponse:
         ),
     }
     return render(request, "pages/licensure.html", context)
+
+
+def robots_txt(request: HttpRequest) -> HttpResponse:
+    lines = [
+        "User-agent: *",
+        "Allow: /",
+        f"Sitemap: {settings.SITE_URL}/sitemap.xml",
+    ]
+    return HttpResponse("\n".join(lines), content_type="text/plain")
+
+
+def sitemap_xml(request: HttpRequest) -> HttpResponse:
+    site_url = settings.SITE_URL
+    urls = [
+        {"loc": f"{site_url}/",           "priority": "1.0", "changefreq": "weekly"},
+        {"loc": f"{site_url}/pricing/",    "priority": "0.9", "changefreq": "monthly"},
+        {"loc": f"{site_url}/resources/",  "priority": "0.7", "changefreq": "monthly"},
+        {"loc": f"{site_url}/trainings/",  "priority": "0.6", "changefreq": "weekly"},
+        {"loc": f"{site_url}/licensure/",  "priority": "0.7", "changefreq": "monthly"},
+    ]
+    return render(request, "sitemap.xml", {"urls": urls}, content_type="application/xml")

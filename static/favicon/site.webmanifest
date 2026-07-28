@@ -1,0 +1,22 @@
+{
+  "name": "Nurtured Story",
+  "short_name": "Nurtured Story",
+  "description": "Relational therapy and sex counseling through Nurtured Story",
+  "icons": [
+    {
+      "src": "/static/favicon/web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/static/favicon/web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "theme_color": "#151226",
+  "background_color": "#151226",
+  "display": "standalone"
+}

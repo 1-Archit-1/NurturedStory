@@ -151,3 +151,11 @@ if not EMAIL_HOST_USER:
 # sees the real visitor IP rather than the proxy's internal IP.
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+# =============================================================================
+# SITE URL  (used for canonical tags and Open Graph URLs)
+# =============================================================================
+# Set this to the full domain in production, e.g. https://nurturedstory.com
+# Falls back to empty string in development (canonical tags still render, just
+# without the domain prefix which is fine for local testing).
+SITE_URL = os.environ.get("SITE_URL", "").rstrip("/")

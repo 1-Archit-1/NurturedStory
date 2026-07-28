@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Home | {{ site.practice_name|default:"Nurtured Story" }}{% endblock %}
+{% block title %}Nurtured Story | Relational &amp; Sex Therapy — Atlanta Area, GA{% endblock %}
 
 {% block content %}
 
@@ -14,9 +14,9 @@
     <article class="photo-card section-card" data-cosmic-anchor="profile-photo">
       <div role="img" aria-label="Therapist photo">
         {% if therapist.photo %}
-          <img src="{{ therapist.photo.url }}" alt="Photo of {{ therapist.name }}" class="profile-photo" />
+          <img src="{{ therapist.photo.url }}" alt="Photo of {{ therapist.name }}" class="profile-photo" width="280" height="350" />
         {% else %}
-          <img src="{% static 'shel-image.avif' %}" alt="Photo of {{ therapist.name }}" class="profile-photo" />
+          <img src="{% static 'shel-image.avif' %}" alt="Photo of {{ therapist.name }}" class="profile-photo" width="280" height="350" />
         {% endif %}
       </div>
       <div class="photo-card-byline">

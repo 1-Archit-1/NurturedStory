@@ -5,6 +5,8 @@ from django.urls import reverse
 from .models import (
     ContactSubmission,
     LicensurePage,
+    LocalBusinessSEO,
+    PageSEO,
     ResourceCategory,
     ResourceLink,
     Service,
@@ -219,3 +221,45 @@ class ContactSubmissionAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return True  # Allow cleaning up old submissions
+
+
+# ---------------------------------------------------------------------------
+# Page SEO
+# One row per page — meta title and description editable per page
+# ---------------------------------------------------------------------------
+
+@admin.register(PageSEO)
+class PageSEOAdmin(admin.ModelAdmin):
+    list_display = ["get_page_display", "meta_title", "meta_description"]
+    ordering = ["page"]
+    fieldsets = [
+        (None, {
+            "description": (
+                "Control how each page appears in Google search results. "
+                "Leave fields blank to use the page's built-in defaults."
+            ),
+            "fields": ["page", "meta_title", "meta_description"],
+        }),
+    ]
+
+    def get_page_display(self, obj):
+        return obj.get_page_display()
+    get_page_display.short_description = "Page"
+
+
+# ---------------------------------------------------------------------------
+# Local Business SEO
+# Singleton — structured data for Google knowledge panel / rich results
+# ---------------------------------------------------------------------------
+
+@admin.register(LocalBusinessSEO)
+class LocalBusinessSEOAdmin(SingletonModelAdmin):
+    fieldsets = [
+        (None, {
+            "description": (
+                "This data is embedded invisibly in every page and read by Google. "
+                "Keep it in sync with your Google Business Profile."
+            ),
+            "fields": ["city", "state"],
+        }),
+    ]
