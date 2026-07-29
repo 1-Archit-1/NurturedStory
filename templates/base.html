@@ -70,7 +70,10 @@
     <footer class="site-footer">
       <p>
         {{ site.footer_text|default:"Copyright 2026 Nurtured Story" }} |
+        {# TODO: uncomment when email is ready to display publicly #}
+        {% comment %}
         <a href="mailto:{{ site.email|default:'shel@nurturedstory.com' }}">{{ site.email|default:"shel@nurturedstory.com" }}</a> |
+        {% endcomment %}
         <a href="tel:{{ site.phone|default:'4705995630' }}">{{ site.phone|default:"470-599-5630" }}</a>
       </p>
       <p class="subtitle">{{ site.tagline|default:"Relational and Sex Counseling" }}</p>

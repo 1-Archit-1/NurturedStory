@@ -55,7 +55,7 @@ class SiteSettingsAdmin(SingletonModelAdmin):
         }),
         # Affects: pricing page 'Reach Out Directly' card, footer, trainings mailto link
         ("Contact Details", {
-            "fields": ["phone", "email"],
+            "fields": ["phone", "email", "contact_recipient_email"],
         }),
         # Affects: pricing page, shown beneath the session rate rows
         ("Pricing Page", {

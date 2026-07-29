@@ -190,7 +190,10 @@ def pricing(request: HttpRequest) -> HttpResponse:
                 message=message,
             )
 
-            # Send notification email
+            # Send notification email — recipient comes from Site Settings,
+            # falling back to the env variable if not set in the admin
+            site = SiteSettings.load()
+            recipient = site.contact_recipient_email or settings.CONTACT_RECIPIENT_EMAIL
             phone_line = f"\nPhone: {phone}" if phone else ""
             try:
                 send_mail(
@@ -202,7 +205,7 @@ def pricing(request: HttpRequest) -> HttpResponse:
                         f"Message:\n{message}"
                     ),
                     from_email=settings.EMAIL_HOST_USER or "noreply@nurturedstory.com",
-                    recipient_list=[settings.CONTACT_RECIPIENT_EMAIL],
+                    recipient_list=[recipient],
                     fail_silently=False,
                 )
             except Exception:

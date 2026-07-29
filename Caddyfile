@@ -1,10 +1,5 @@
-# Replace ":80" with your actual domain for automatic HTTPS via Let's Encrypt.
-# Example: nurturedstory.com {
-#
-# For local testing or when SSL is handled upstream, use ":80".
-:80 {
-    # Proxy everything (including /static/ and /media/) to Django/Gunicorn.
-    # Static files are baked into the image via collectstatic at build time,
-    # so Django's staticfiles app serves them directly — no separate volume needed.
+nurturedstory.com, www.nurturedstory.com {
+    # Caddy automatically obtains and renews HTTPS certificates via Let's Encrypt.
+    # Both apex (nurturedstory.com) and www are covered.
     reverse_proxy web:8000
 }

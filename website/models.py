@@ -57,6 +57,12 @@ class SiteSettings(SingletonModel):
         default="About the Practice",
         help_text="Heading for the 'About the Practice' card on the home page.",
     )
+    contact_recipient_email = models.EmailField(
+        blank=True,
+        default="shel@nurturedstory.com",
+        help_text="Email address that receives contact form submissions. "
+                  "Can be the same as the display email or a different inbox.",
+    )
     sliding_scale_note = models.CharField(
         max_length=300,
         blank=True,
