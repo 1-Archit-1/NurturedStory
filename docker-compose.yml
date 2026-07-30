@@ -5,6 +5,7 @@ services:
     build: .
     volumes:
       - sqlite_data:/app/data
+      - media_data:/app/media
     env_file:
       - .env
     ports:
@@ -12,3 +13,4 @@ services:
 
 volumes:
   sqlite_data:
+  media_data:

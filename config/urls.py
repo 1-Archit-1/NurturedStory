@@ -8,6 +8,8 @@ urlpatterns = [
     path("", include("website.urls")),
 ]
 
-# Serve uploaded media files during local development
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Serve uploaded media files via Django.
+# WhiteNoise only handles static files baked into the image — media files are
+# user-uploaded at runtime so Django serves them directly here.
+# This is fine for low-traffic admin uploads (therapist photo, etc.)
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
