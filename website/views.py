@@ -385,3 +385,23 @@ def sitemap_xml(request: HttpRequest) -> HttpResponse:
         {"loc": f"{site_url}/licensure/",  "priority": "0.7", "changefreq": "monthly"},
     ]
     return render(request, "sitemap.xml", {"urls": urls}, content_type="application/xml")
+
+def health_check(request: HttpRequest) -> HttpResponse:
+    """
+    Lightweight health check endpoint for Docker and Coolify.
+
+    Verifies:
+    - Django is running and can handle requests
+    - The database is reachable (catches migration issues, corrupted DB, etc.)
+
+    Returns 200 OK with "ok" on success, 503 on failure.
+    Docker healthcheck in docker-compose.yml polls this every 30s.
+    Coolify monitors container health and can send email alerts on failure.
+    """
+    try:
+        from django.db import connection
+        connection.ensure_connection()
+    except Exception as e:
+        return HttpResponse(f"db error: {e}", status=503, content_type="text/plain")
+
+    return HttpResponse("ok", status=200, content_type="text/plain")
