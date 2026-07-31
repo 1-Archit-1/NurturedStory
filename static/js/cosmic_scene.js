@@ -449,9 +449,17 @@
     const initParallax = () => {
         const sceneEl = document.getElementById("cosmic-scene");
         const pinSceneHeight = () => {
-            if (sceneEl) sceneEl.style.height = `${document.body.scrollHeight}px`;
+            if (!sceneEl) return;
+            // Temporarily remove the explicit height so it doesn't inflate scrollHeight
+            sceneEl.style.height = '';
+            // Now measure the true content height
+            const h = document.body.scrollHeight;
+            sceneEl.style.height = `${h}px`;
         };
         pinSceneHeight();
+
+        // Repin after full page load (fonts, images etc. may have expanded the page)
+        window.addEventListener('load', pinSceneHeight, { once: true });
 
         let currentScroll = window.scrollY;
         let targetScroll = window.scrollY;
