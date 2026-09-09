@@ -1,0 +1,38 @@
+# Version control
+.git/
+.gitignore
+
+# Local development
+.env
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Local database — production uses the Docker volume at /app/data/
+db.sqlite3
+
+# Media uploads — production uses the Docker volume at /app/media/
+media/
+
+# Collected static files — regenerated at build time by collectstatic
+staticfiles/
+
+# Editor/IDE
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Docker compose variants (only dockerfile is needed for the build)
+docker-compose*.yml
+.dockerignore
+
+# Docs and deployment notes
+README.md
+deployLog.md
+Caddyfile
+.env.example

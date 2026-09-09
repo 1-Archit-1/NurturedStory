@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
-SQLite backup to Cloudflare R2 with grandfather-father-son retention.
+Backup script for SQLite DB and media files to Cloudflare R2.
 
 Usage:
-    python scripts/backup.py daily     — daily backup, retains 3 days
-    python scripts/backup.py weekly    — weekly backup, retains 4 weeks
-    python scripts/backup.py monthly   — monthly backup, retains 2 months
+    python scripts/backup.py daily     — daily DB backup, retains 3 days
+    python scripts/backup.py weekly    — weekly DB backup, retains 4 weeks
+    python scripts/backup.py monthly   — monthly DB backup, retains 2 months
+    python scripts/backup.py media     — sync media files to R2 (no versioning)
 
 Required environment variables (set in Coolify):
     R2_ACCESS_KEY_ID        — R2 API access key
@@ -14,14 +15,16 @@ Required environment variables (set in Coolify):
     R2_BUCKET               — bucket name (e.g. "nurturedstory-backups")
 
 Scheduled via Coolify Scheduled Tasks:
-    daily   — 0 3 * * *      (3am UTC every day)
-    weekly  — 0 4 * * 0      (4am UTC Sunday)
-    monthly — 0 5 1 * *      (5am UTC 1st of month)
+    daily   — python scripts/backup.py daily    — 0 3 * * *   (retains 3 days)
+    weekly  — python scripts/backup.py weekly   — 0 4 * * 0   (retains 4 weeks)
+    monthly — python scripts/backup.py monthly  — 0 5 1 * *   (retains 2 months)
+    media   — python scripts/backup.py media    — 0 2 * * 0   (every Sunday 2am)
 """
 
 import os
 import sys
 import sqlite3
+import hashlib
 import tempfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -30,9 +33,10 @@ import boto3
 from botocore.config import Config
 
 
-DB_PATH = Path("/app/data/db.sqlite3")
+DB_PATH    = Path("/app/data/db.sqlite3")
+MEDIA_PATH = Path("/app/media")
 
-# Retention days per cadence
+# Retention days per DB backup cadence
 RETENTION = {
     "daily":   3,
     "weekly":  28,
@@ -54,14 +58,25 @@ def get_env(name: str) -> str:
     return value
 
 
+def make_client() -> boto3.client:
+    return boto3.client(
+        "s3",
+        endpoint_url=get_env("R2_ENDPOINT_URL"),
+        aws_access_key_id=get_env("R2_ACCESS_KEY_ID"),
+        aws_secret_access_key=get_env("R2_SECRET_ACCESS_KEY"),
+        region_name="auto",
+        config=Config(signature_version="s3v4"),
+    )
+
+
+# =============================================================================
+# DB backup
+# =============================================================================
+
 def snapshot_db(dest_path: Path) -> None:
     """Take a live snapshot of the SQLite DB using the online backup API."""
     with sqlite3.connect(DB_PATH) as source, sqlite3.connect(dest_path) as dest:
         source.backup(dest)
-
-
-def upload_to_r2(client, bucket: str, local_path: Path, key: str) -> None:
-    client.upload_file(str(local_path), bucket, key)
 
 
 def prune_old_backups(client, bucket: str, prefix: str, retain_days: int) -> None:
@@ -78,40 +93,22 @@ def prune_old_backups(client, bucket: str, prefix: str, retain_days: int) -> Non
     if not to_delete:
         return
 
-    # S3 delete_objects accepts up to 1000 keys per request
     for i in range(0, len(to_delete), 1000):
         batch = to_delete[i:i + 1000]
         client.delete_objects(Bucket=bucket, Delete={"Objects": batch})
         for item in batch:
-            log(f"Pruned old backup: {item['Key']}")
+            log(f"Pruned: {item['Key']}")
 
 
-def main() -> None:
-    cadence = sys.argv[1] if len(sys.argv) > 1 else "daily"
-    if cadence not in RETENTION:
-        log(f"ERROR: unknown cadence '{cadence}' (expected daily|weekly|monthly)")
-        sys.exit(1)
-
-    log(f"Starting {cadence} backup")
+def backup_db(cadence: str) -> None:
+    log(f"Starting {cadence} DB backup")
 
     if not DB_PATH.exists():
         log(f"ERROR: database not found at {DB_PATH}")
         sys.exit(1)
 
-    access_key = get_env("R2_ACCESS_KEY_ID")
-    secret_key = get_env("R2_SECRET_ACCESS_KEY")
-    endpoint   = get_env("R2_ENDPOINT_URL")
-    bucket     = get_env("R2_BUCKET")
-
-    client = boto3.client(
-        "s3",
-        endpoint_url=endpoint,
-        aws_access_key_id=access_key,
-        aws_secret_access_key=secret_key,
-        # R2 uses "auto" region — required by the boto3 signature
-        region_name="auto",
-        config=Config(signature_version="s3v4"),
-    )
+    client = make_client()
+    bucket = get_env("R2_BUCKET")
 
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
     key = f"{cadence}/db-{timestamp}.sqlite3"
@@ -121,14 +118,79 @@ def main() -> None:
 
     try:
         snapshot_db(tmp_path)
-        upload_to_r2(client, bucket, tmp_path, key)
+        client.upload_file(str(tmp_path), bucket, key)
         log(f"Uploaded to s3://{bucket}/{key}")
-
         prune_old_backups(client, bucket, cadence, RETENTION[cadence])
     finally:
         tmp_path.unlink(missing_ok=True)
 
-    log("Backup complete")
+    log("DB backup complete")
+
+
+# =============================================================================
+# Media sync
+# =============================================================================
+
+def backup_media() -> None:
+    """
+    Sync /app/media to R2 under the 'media/' prefix.
+    Uses ETag comparison to skip unchanged files — only uploads new/modified files.
+    Does not delete files from R2 that are removed locally (safe default).
+    """
+    log("Starting media sync")
+
+    if not MEDIA_PATH.exists():
+        log("No media directory found — skipping")
+        return
+
+    client = make_client()
+    bucket = get_env("R2_BUCKET")
+
+    # Build a map of existing R2 objects: key → ETag
+    existing: dict[str, str] = {}
+    paginator = client.get_paginator("list_objects_v2")
+    for page in paginator.paginate(Bucket=bucket, Prefix="media/"):
+        for obj in page.get("Contents", []):
+            existing[obj["Key"]] = obj["ETag"].strip('"')
+
+    uploaded = 0
+    skipped  = 0
+
+    for local_file in sorted(MEDIA_PATH.rglob("*")):
+        if not local_file.is_file():
+            continue
+
+        relative = local_file.relative_to(MEDIA_PATH)
+        r2_key   = f"media/{relative.as_posix()}"
+
+        # Compare MD5 with R2 ETag to skip unchanged files
+        md5 = hashlib.md5(local_file.read_bytes()).hexdigest()
+
+        if existing.get(r2_key) == md5:
+            skipped += 1
+            continue
+
+        client.upload_file(str(local_file), bucket, r2_key)
+        log(f"Uploaded: {r2_key}")
+        uploaded += 1
+
+    log(f"Media sync complete — {uploaded} uploaded, {skipped} unchanged")
+
+
+# =============================================================================
+# Entry point
+# =============================================================================
+
+def main() -> None:
+    cadence = sys.argv[1] if len(sys.argv) > 1 else "daily"
+
+    if cadence == "media":
+        backup_media()
+    elif cadence in RETENTION:
+        backup_db(cadence)
+    else:
+        log(f"ERROR: unknown cadence '{cadence}' (expected daily|weekly|monthly|media)")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
