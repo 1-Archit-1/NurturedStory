@@ -609,7 +609,19 @@ textarea { min-height: 140px; resize: vertical; }
 
 /* --- Stars & constellations --- */
 
-.cosmic-stars,
+.cosmic-stars {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100lvh;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  animation: sceneFadeIn 2s ease-out both;
+}
+
 .cosmic-planets,
 .cosmic-constellations {
   position: absolute;
