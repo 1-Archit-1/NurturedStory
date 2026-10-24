@@ -195,6 +195,8 @@ aws --endpoint-url <R2_ENDPOINT_URL> s3 cp \
 
 Make sure the container is running and the `sqlite_data` volume exists before restoring. If setting up a fresh server, complete the full first-time setup (steps 1–6) first, then restore.
 
+On a fresh server the first start migrates an empty database and seeds it with the default content snapshot (`website/fixtures/current_content.json`), so the site comes up with placeholder content. The restore below replaces that whole database with your backup. Afterwards, `migrate` only applies migrations newer than the backup.
+
 ### Step 4 — Stop the container
 
 ```bash
