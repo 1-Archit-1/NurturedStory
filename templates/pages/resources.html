@@ -24,7 +24,7 @@
         class="resource-card-header"
         role="button"
         tabindex="0"
-        aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}"
+        aria-expanded="false"
         aria-controls="resource-body-{{ forloop.counter0 }}"
       >
         <div class="resource-emoji">{{ resource.emoji }}</div>
@@ -35,7 +35,7 @@
         <span class="accordion-toggle-icon" aria-hidden="true">▾</span>
       </div>
 
-      <div class="resource-accordion-body{% if forloop.first %} is-expanded{% endif %}" id="resource-body-{{ forloop.counter0 }}">
+      <div class="resource-accordion-body" id="resource-body-{{ forloop.counter0 }}">
         <div class="resource-accordion-inner">
           {% if resource.links %}
             <ul class="resource-link-list">

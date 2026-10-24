@@ -101,6 +101,36 @@
         document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
       })();
 
+      // Mobile: tuck the header away while scrolling down, bring it back on scroll up
+      (() => {
+        const header = document.querySelector(".site-header");
+        if (!header) return;
+        const mobile = window.matchMedia("(max-width: 860px)");
+        const THRESHOLD = 8; // px of movement before reacting, ignores jitter
+        let lastY = window.scrollY;
+        let ticking = false;
+
+        const update = () => {
+          ticking = false;
+          const y = window.scrollY;
+          const delta = y - lastY;
+          if (Math.abs(delta) < THRESHOLD) return;
+          lastY = y;
+
+          // Stay visible on desktop, near the top, or while the user is using the nav
+          const keep = !mobile.matches
+            || y < header.offsetHeight
+            || header.contains(document.activeElement)
+            || header.querySelector(".nav-dropdown.is-open");
+          header.classList.toggle("is-tucked", !keep && delta > 0);
+        };
+
+        window.addEventListener("scroll", () => {
+          if (!ticking) { ticking = true; requestAnimationFrame(update); }
+        }, { passive: true });
+        mobile.addEventListener("change", () => header.classList.remove("is-tucked"));
+      })();
+
       // Hide the floating Book button whenever the footer is visible
       (() => {
         const fab = document.getElementById("book-fab");
