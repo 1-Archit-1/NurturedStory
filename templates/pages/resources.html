@@ -24,7 +24,7 @@
         class="resource-card-header"
         role="button"
         tabindex="0"
-        aria-expanded="false"
+        aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}"
         aria-controls="resource-body-{{ forloop.counter0 }}"
       >
         <div class="resource-emoji">{{ resource.emoji }}</div>
@@ -35,11 +35,7 @@
         <span class="accordion-toggle-icon" aria-hidden="true">▾</span>
       </div>
 
-      {% comment %}
-        All cards start collapsed: the cosmic scene pins its height to the page at
-        load, so a page that shrinks after load would leave blank space below.
-      {% endcomment %}
-      <div class="resource-accordion-body" id="resource-body-{{ forloop.counter0 }}">
+      <div class="resource-accordion-body{% if forloop.first %} is-expanded{% endif %}" id="resource-body-{{ forloop.counter0 }}">
         <div class="resource-accordion-inner">
           {% if resource.links %}
             <ul class="resource-link-list">
@@ -117,6 +113,8 @@
       // ── Accordion layout + wiring ───────────────────────────────────────
       document.querySelectorAll(".resource-card-header").forEach((header) => {
         const card = header.closest(".resource-card");
+        // In modal layout the header opens a dialog, so "expanded" doesn't apply
+        if (!isAccordion(card)) header.removeAttribute("aria-expanded");
         const activate = () => {
           if (!isAccordion(card)) {
             openModal(card);

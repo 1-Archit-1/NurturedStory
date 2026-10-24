@@ -3,6 +3,8 @@
     const starsHost = document.getElementById("cosmic-stars");
     const constellationHost = document.getElementById("cosmic-constellations");
     const planetsHost = document.getElementById("cosmic-planets");
+    // Optional — drifts with the other layers when present
+    const sunArc = document.querySelector(".cosmic-sun-arc");
 
     if (!configEl || !starsHost || !constellationHost || !planetsHost) {
         return;
@@ -44,8 +46,8 @@
                     console.log("[cosmic] switching to low-perf mode");
                     document.documentElement.classList.add("low-perf");
 
-                    // Reload tsParticles with a lightweight config (60 particles instead of 420,
-                    // no per-particle opacity animation, 30fps cap)
+                    // Reload tsParticles with a lightweight config (base count 60 instead of
+                    // config.stars, no per-particle opacity animation, no retina scaling)
                     if (window.tsParticles && typeof window.tsParticles.dom === "function") {
                         window.tsParticles.dom().forEach(instance => instance.destroy());
                         void loadScene({ lowPerf: true });
@@ -70,18 +72,50 @@
 
     const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
-    // Cached planet/constellation refs — refreshed after any redraw
-    let allWraps = [];
-    let allConstellations = [];
-
-    const refreshParallaxTargets = () => {
-        allWraps = Array.from(document.querySelectorAll('.cosmic-planet-wrap'));
-        allConstellations = Array.from(document.querySelectorAll('.constellation-group'));
-    };
-
     // ── Planet SVG bands flag ──────────────────────────────────────────────
     // Set to true for curved SVG bands, false to fall back to CSS ::after bands
     const PLANET_SVG_BANDS = true;
+
+    // ── Planet arc ─────────────────────────────────────────────────────────
+    // Cubic bezier in % of the viewport (the scene is a fixed, viewport-sized layer).
+    // It drops down the left side, sweeps across the full width near the bottom, then
+    // turns down past the bottom-right edge, so the last planets (Neptune about half
+    // visible, Pluto just below) start off-screen and rise in with the drift parallax.
+    // Slots are spaced by on-screen distance along the curve (not by t), so planets
+    // don't bunch where the curve is steep; the first ARC_START of the length is left
+    // empty to keep clear of the sun arc in the top-left.
+    const ARC = { p0: [6, 8], c1: [8, 85], c2: [95, 85], p1: [95, 112] };
+    const ARC_START = 0.14;
+
+    const arcPoint = (t) => {
+        const u = 1 - t;
+        const a = u * u * u, b = 3 * u * u * t, c = 3 * u * t * t, d = t * t * t;
+        return {
+            x: a * ARC.p0[0] + b * ARC.c1[0] + c * ARC.c2[0] + d * ARC.p1[0],
+            y: a * ARC.p0[1] + b * ARC.c1[1] + c * ARC.c2[1] + d * ARC.p1[1],
+        };
+    };
+
+    const buildArcSlots = (count) => {
+        if (count < 1) return [];
+        // Cumulative length in pixels, so spacing looks even on any aspect ratio
+        const STEPS = 200;
+        const w = window.innerWidth / 100;
+        const h = window.innerHeight / 100;
+        const lengths = [0];
+        let prev = arcPoint(0);
+        for (let i = 1; i <= STEPS; i++) {
+            const p = arcPoint(i / STEPS);
+            lengths.push(lengths[i - 1] + Math.hypot((p.x - prev.x) * w, (p.y - prev.y) * h));
+            prev = p;
+        }
+        const total = lengths[STEPS];
+        return Array.from({ length: count }, (_, i) => {
+            const share = count === 1 ? 1 : ARC_START + (i * (1 - ARC_START)) / (count - 1);
+            const step = lengths.findIndex(l => l >= share * total);
+            return arcPoint(step / STEPS);
+        });
+    };
     // ──────────────────────────────────────────────────────────────────────
 
     // Band definitions per palette: [yOffset (fraction of r), ry (fraction of r), opacity, color]
@@ -183,40 +217,31 @@
     const drawPlanets = () => {
         planetsHost.innerHTML = "";
         const planets = Array.isArray(config.planets) ? config.planets : [];
+        const arcSlots = buildArcSlots(planets.length);
 
         planets.forEach((planet, index) => {
-            // Outer wrapper — handles position + parallax only
+            // Outer wrapper — handles position only (the host layer handles parallax)
             const wrapEl = document.createElement("div");
             wrapEl.className = "cosmic-planet-wrap";
-            wrapEl.style.setProperty("--parallax-y", "0px");
 
             // Inner planet — handles breathe animation + visuals
             const planetEl = document.createElement("div");
             planetEl.className = `cosmic-planet palette-${planet.palette || "violet"}`;
             planetEl.setAttribute("aria-label", planet.label || planet.id || "planet");
-            if (planet.anchor) {
-                wrapEl.dataset.cosmicAnchor = planet.anchor;
-            }
+            // Don't copy planet.anchor onto the wrap as data-cosmic-anchor: the scene
+            // precedes <main>, so querySelector('[data-cosmic-anchor=...]') (here and in
+            // page scripts like pricing's scroll-to-form) would match the planet, not the card.
 
             const size = Number(planet.size) || 72;
             const mobileFactor = window.innerWidth <= 860 ? 0.5 : 1;
             const scaledSize = Math.round(size * mobileFactor);
-            const t = (index + 1) / (planets.length + 1);
 
-            // Quadratic bezier arc: P0=(10,5) control=(15,90) P1=(90,92)
-            // Control point bottom-left makes the curve concave (bowing inward).
-            const bx = (1 - t) * (1 - t) * 10 + 2 * (1 - t) * t * 15 + t * t * 90;
-            const by = (1 - t) * (1 - t) *  5 + 2 * (1 - t) * t * 90 + t * t * 92;
-            const pathX = clamp(bx, 5, 95);
-            const pathY = clamp(by, 5, 95);
+            // y is not clamped at the bottom: the arc's tail is meant to start off-screen
+            const slot = arcSlots[index];
+            const x = clamp(slot.x, 5, 95);
+            const y = Math.max(slot.y, 5);
 
             const anchorEl = planet.anchor ? document.querySelector(`[data-cosmic-anchor="${planet.anchor}"]`) : null;
-            const anchorRect = anchorEl ? anchorEl.getBoundingClientRect() : null;
-            const anchorX = anchorRect ? ((anchorRect.left + anchorRect.width / 2) / window.innerWidth) * 100 : null;
-            const anchorY = anchorRect ? ((anchorRect.top + anchorRect.height / 2) / window.innerHeight) * 100 : null;
-
-            const x = clamp(pathX, 5, 95);
-            const y = clamp(pathY, 5, 95);
 
             wrapEl.style.left = `${x}%`;
             wrapEl.style.top = `${y}%`;
@@ -264,35 +289,36 @@
         const constellations = Array.isArray(config.constellations) ? config.constellations : [];
 
         // ── Placement presets ──────────────────────────────────────────────
-        // Each preset is an array of {left, top} (in %) — one entry per constellation.
+        // Each preset is an array of {left, top} (in % of the viewport) — one entry per
+        // constellation. `top` stays within 20–80% so no group sits under the sticky header.
         // Add new presets here; set config.constellation_layout in views.py to switch.
         const PLACEMENT_PRESETS = {
             "home":[
-                { left: 85, top: 12 },   // top-right
-                { left: 10, top: 35 },   // upper-centre
-                { left: 19, top: 58 },   // lower-centre
-                { left: 78, top: 78 },   // bottom-left
+                { left: 85, top: 20 },   // top-right
+                { left: 10, top: 41 },   // upper-centre
+                { left: 19, top: 62 },   // lower-centre
+                { left: 78, top: 80 },   // bottom-left
             ],
             // Spacious quad spread — one in each quadrant
             "default": [
-                { left: 18, top: 22 },   // top-left
-                { left: 78, top: 30 },   // top-right
-                { left: 22, top: 70 },   // bottom-left
-                { left: 72, top: 72 },   // bottom-right
+                { left: 18, top: 29 },   // top-left
+                { left: 78, top: 36 },   // top-right
+                { left: 22, top: 73 },   // bottom-left
+                { left: 72, top: 75 },   // bottom-right
             ],
             // Scattered across top two-thirds, nothing near the bottom edge
             "top-heavy": [
-                { left: 15, top: 19 },   // top-left
-                { left: 78, top: 22 },   // top-right
-                { left: 42, top: 44 },   // centre
-                { left: 20, top: 62 },   // mid-left
+                { left: 15, top: 26 },   // top-left
+                { left: 78, top: 29 },   // top-right
+                { left: 42, top: 49 },   // centre
+                { left: 20, top: 65 },   // mid-left
             ],
             // True diagonal sweep — evenly spaced top-right to bottom-left
             "diagonal": [
-                { left: 85, top: 12 },   // top-right
-                { left: 55, top: 35 },   // upper-centre
-                { left: 30, top: 58 },   // lower-centre
-                { left: 12, top: 78 },   // bottom-left
+                { left: 85, top: 20 },   // top-right
+                { left: 55, top: 41 },   // upper-centre
+                { left: 30, top: 62 },   // lower-centre
+                { left: 12, top: 80 },   // bottom-left
             ],
         };
 
@@ -306,7 +332,7 @@
 
             const placement = placements[index] || {
                 left: index % 2 === 0 ? 20 : 80,
-                top: 15 + ((index + 1) / (constellations.length + 1)) * 70,
+                top: 20 + ((index + 1) / (constellations.length + 1)) * 60,
             };
 
             const groupWrapper = document.createElement("div");
@@ -315,7 +341,6 @@
 
             groupWrapper.style.left = `${placement.left}%`;
             groupWrapper.style.top  = `${placement.top}%`;
-            groupWrapper.style.setProperty("--parallax-y", "0px");
 
             const randomDelay = -(seedValue(200 + index) * 4);
             groupWrapper.style.animationDelay = `${randomDelay}s`;
@@ -360,7 +385,7 @@
                 svg.appendChild(line);
             });
 
-            points.forEach((point, i) => {
+            points.forEach((point) => {
                 const star = document.createElementNS("http://www.w3.org/2000/svg", "circle");
                 star.setAttribute("cx", `${point.x}`);
                 star.setAttribute("cy", `${point.y}`);
@@ -446,38 +471,41 @@
             },
         });
     };
+    // Drift parallax: the scene is a fixed viewport layer, so each layer only needs to
+    // move a little *slower* than the content to read as depth. Whole layers are
+    // translated (one transform write each per frame), never individual planets.
     const initParallax = () => {
-        const sceneEl = document.getElementById("cosmic-scene");
-        const pinSceneHeight = () => {
-            if (!sceneEl) return;
-            // Temporarily remove the explicit height so it doesn't inflate scrollHeight
-            sceneEl.style.height = '';
-            // Now measure the true content height
-            const h = document.body.scrollHeight;
-            sceneEl.style.height = `${h}px`;
-        };
-        pinSceneHeight();
+        // factor = fraction of scroll speed; cap = max drift as a fraction of viewport
+        // height (null = no cap: linear drift for the whole page).
+        // Depth order: sun (furthest) < constellations < planets (closest).
+        const DRIFT = [
+            // Uncapped so every planet (including the lower ones) keeps rising for the
+            // whole scroll; planets may leave the top of the screen on long pages.
+            { el: planetsHost,       factor: 0.2,  cap: null },
+            { el: constellationHost, factor: 0.05, cap: 0.12 },
+            { el: sunArc,            factor: 0.04, cap: 0.08 },
+        ].filter(layer => layer.el);
 
-        // Repin after full page load (fonts, images etc. may have expanded the page)
-        window.addEventListener('load', pinSceneHeight, { once: true });
-
+        // Cached so the frame loop never reads layout. Only refreshed on a real width
+        // change, so the cap stays stable when the mobile address bar shows/hides.
+        let viewportH = window.innerHeight;
         let currentScroll = window.scrollY;
-        let targetScroll = window.scrollY;
+        let targetScroll = currentScroll;
         let rafId = null;
-        let lastInnerWidth = window.innerWidth;
 
         const lerp = (a, b, t) => a + (b - a) * t;
 
+        // Capped: linear (slope = factor) near the top, easing smoothly into the cap.
+        // Uncapped: plain linear.
+        const drift = (scroll, factor, capPx) =>
+            capPx ? capPx * Math.tanh((scroll * factor) / capPx) : scroll * factor;
+
         const applyParallax = () => {
-            currentScroll = lerp(currentScroll, targetScroll, 0.08);
+            currentScroll = lerp(currentScroll, targetScroll, 0.1);
 
-            // Uses shared allWraps / allConstellations — always up to date after redraws
-            allWraps.forEach(wrap => {
-                wrap.style.setProperty('--parallax-y', `${currentScroll * -0.6}px`);
-            });
-
-            allConstellations.forEach(constellation => {
-                constellation.style.setProperty('--parallax-y', `${currentScroll * -0.15}px`);
+            DRIFT.forEach(({ el, factor, cap }) => {
+                const y = -drift(currentScroll, factor, cap && cap * viewportH);
+                el.style.transform = `translate3d(0, ${y.toFixed(2)}px, 0)`;
             });
 
             if (Math.abs(currentScroll - targetScroll) > 0.5) {
@@ -487,25 +515,34 @@
             }
         };
 
-        window.addEventListener('scroll', () => {
-            targetScroll = window.scrollY;
+        const schedule = () => {
             if (!rafId) {
                 rafId = requestAnimationFrame(applyParallax);
             }
+        };
+
+        window.addEventListener("scroll", () => {
+            targetScroll = window.scrollY;
+            schedule();
         }, { passive: true });
 
-        // Only repin on genuine width change — height-only = mobile address bar, ignore
-        window.addEventListener('resize', () => {
-            if (window.innerWidth !== lastInnerWidth) {
-                lastInnerWidth = window.innerWidth;
-                pinSceneHeight();
-            }
-        }, { passive: true });
+        // Start at the right offset when the page loads mid-scroll (back/forward, #anchor)
+        applyParallax();
+
+        return {
+            onWidthChange: () => {
+                viewportH = window.innerHeight;
+                schedule();
+            },
+        };
     };
+
+    // Set by render(); stays null under reduced motion (static layers)
+    let parallax = null;
+
     const render = () => {
         drawPlanets();
         drawConstellations();
-        refreshParallaxTargets();
 
         // If user explicitly wants reduced motion, skip everything
         if (prefersReducedMotion) {
@@ -513,7 +550,7 @@
             return;
         }
 
-        initParallax();
+        parallax = initParallax();
 
         // Check repeatedly until tsParticles is loaded from the CDN
         const initParticles = () => {
@@ -530,21 +567,32 @@
         monitorPerfDuringAnimations();
     };
     render();
-    // Add interactive hover effect for constellations
-    window.addEventListener("mousemove", (e) => {
-        const groups = document.querySelectorAll(".constellation-group");
+    // Add interactive hover effect for constellations.
+    // Coalesced to one rAF per frame so layout reads don't run on every mouse event.
+    let mouseX = 0;
+    let mouseY = 0;
+    let hoverRafId = null;
+
+    const updateConstellationHover = () => {
+        hoverRafId = null;
+        const groups = constellationHost.querySelectorAll(".constellation-group");
         groups.forEach((group) => {
             const rect = group.getBoundingClientRect();
             const centerX = rect.left + rect.width / 2;
             const centerY = rect.top + rect.height / 2;
-            const distance = Math.hypot(e.clientX - centerX, e.clientY - centerY);
-            if (distance < 250) { 
-                group.classList.add("is-lit");
-            } else {
-                group.classList.remove("is-lit");
-            }
+            const distance = Math.hypot(mouseX - centerX, mouseY - centerY);
+            group.classList.toggle("is-lit", distance < 250);
         });
-    });
+    };
+
+    window.addEventListener("mousemove", (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        if (!hoverRafId) {
+            hoverRafId = requestAnimationFrame(updateConstellationHover);
+        }
+    }, { passive: true });
+
     let resizeTimer;
     let lastResizeWidth = window.innerWidth;
     window.addEventListener("resize", () => {
@@ -555,9 +603,7 @@
         resizeTimer = window.setTimeout(() => {
             drawPlanets();
             drawConstellations();
-            refreshParallaxTargets();
-            const sceneEl = document.getElementById("cosmic-scene");
-            if (sceneEl) sceneEl.style.height = `${document.body.scrollHeight}px`;
+            if (parallax) parallax.onWidthChange();
         }, 120);
     });
 })();

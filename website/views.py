@@ -9,7 +9,6 @@ from .forms import ContactForm
 from .models import (
     ContactSubmission,
     LicensurePage,
-    LocalBusinessSEO,
     PageSEO,
     ResourceCategory,
     Service,
@@ -127,10 +126,9 @@ def build_scene(planets: list[dict], constellation_layout: str = "default") -> d
 
 def solar_planets(anchor_map: dict[str, str | None]) -> list[dict]:
     planets = []
-    for index, planet in enumerate(SOLAR_SYSTEM):
+    for planet in SOLAR_SYSTEM:
         item = planet.copy()
         item["anchor"] = anchor_map.get(planet["id"])
-        item["drift"] = index
         planets.append(item)
     return planets
 

@@ -80,8 +80,7 @@
     </footer>
 
     {{ cosmic_scene|default:''|json_script:"cosmic-scene-config" }}
-    <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.x/tsparticles.bundle.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tsparticles/plugin-manual-particles@4/tsparticles.plugin.manualParticles.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js" integrity="sha384-gZSNMuUgSbqcltOBBRNXCH+szg+2C69ISFyCk2w+xsZc0iFU+bIVPfYPmLwLtNzz" crossorigin="anonymous" defer></script>
     <script src="{% static 'js/cosmic_scene.js' %}" defer></script>
 
     <script>
