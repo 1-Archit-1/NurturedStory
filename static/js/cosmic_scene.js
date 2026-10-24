@@ -46,7 +46,7 @@
                     console.log("[cosmic] switching to low-perf mode");
                     document.documentElement.classList.add("low-perf");
 
-                    // Reload tsParticles with a lightweight config (base count 60 instead of
+                    // Reload tsParticles with a lightweight config (base count 80 instead of
                     // config.stars, no per-particle opacity animation, no retina scaling)
                     if (window.tsParticles && typeof window.tsParticles.dom === "function") {
                         window.tsParticles.dom().forEach(instance => instance.destroy());
@@ -444,7 +444,7 @@
                 fpsLimit: 60,
                 particles: {
                     number: {
-                        value: isLowPerf ? 60 : (Number(config.stars) || 300),
+                        value: isLowPerf ? 80 : (Number(config.stars) || 300),
                         density: { enable: true, width: 1920, height: 1080 },
                     },
                     color: { value: ["#ffffff", "#dbe6ff", "#c8b8e8"] },
@@ -555,7 +555,8 @@
         // Check repeatedly until tsParticles is loaded from the CDN
         const initParticles = () => {
             if (typeof window.tsParticles !== "undefined") {
-                void loadScene();
+                // Phones: fewer stars, no retina scaling, no per-particle fades
+                void loadScene({ lowPerf: window.matchMedia("(max-width: 860px)").matches });
             } else {
                 setTimeout(initParticles, 50);
             }

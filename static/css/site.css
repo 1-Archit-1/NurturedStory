@@ -358,8 +358,8 @@ textarea { min-height: 140px; resize: vertical; }
   position: sticky;
   top: 0;
   z-index: 9999;
-  backdrop-filter: blur(8px);
-  background: rgba(8, 12, 25, 0.66);
+  /* Near-opaque instead of backdrop-filter blur: the blur re-rendered over the animated star canvas every frame */
+  background: rgba(8, 12, 25, 0.94);
   border-bottom: 1px solid rgba(180, 140, 255, 0.18);
 }
 
@@ -1311,6 +1311,17 @@ textarea { min-height: 140px; resize: vertical; }
   border-radius: var(--radius-sm);
 }
 
+/* Modal layout: stretch the header's click target over the whole card
+   (padding and any extra height from equal-height grid rows). */
+.resource-card { position: relative; }
+
+.resource-card-header::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  cursor: pointer;
+}
+
 .resource-empty-msg {
   font-family: "Cormorant Garamond", serif;
   font-size: 1rem;
@@ -1613,8 +1624,7 @@ textarea { min-height: 140px; resize: vertical; }
     letter-spacing: 0.1em;
     border-radius: var(--radius-pill);
     border: 1px solid rgba(200, 160, 255, 0.6);
-    background: rgba(120, 80, 220, 0.72);
-    backdrop-filter: blur(10px);
+    background: rgba(120, 80, 220, 0.9);  /* opaque-ish: blur over the moving star canvas is costly */
     box-shadow:
       0 4px 18px rgba(120, 80, 220, 0.45),
       0 0 0 1px rgba(200, 160, 255, 0.15);
@@ -1741,7 +1751,19 @@ textarea { min-height: 140px; resize: vertical; }
   }
 
   /* No hover lift on touch: it "sticks" after a tap and shifts the open card */
-  .resource-card:hover { transform: none; }
+  .resource-card:hover {
+    transform: none;
+    /* Keep the resting shadow: the large hover shadow would repaint on every tap */
+    box-shadow:
+      0 10px 28px rgba(4, 8, 16, 0.24),
+      inset 0 0 28px rgba(70, 45, 140, 0.08);
+  }
+
+  /* Keep card growth from forcing layout outside the card */
+  .resource-card { contain: layout style; }
+
+  /* Accordion layout: only the header toggles, so the card-wide overlay must not cover the links */
+  .resource-card-header::after { content: none; }
 
   .resource-card-header {
     display: flex;
@@ -1798,16 +1820,17 @@ textarea { min-height: 140px; resize: vertical; }
     border-color: rgba(255, 208, 96, 0.35);
   }
 
-  /* --- Expand/collapse: grid 0fr -> 1fr animates to the content's height.
+  /* --- Expand/collapse: the row size flips once (no per-frame layout);
+     only opacity and transform animate, which run on the compositor.
      visibility keeps collapsed links out of the tab order; it flips after the
-     close animation and immediately on open. --- */
+     close fade and immediately on open. --- */
 
   .resource-accordion-body {
     display: grid;
     grid-template-rows: 0fr;
     opacity: 0;
     visibility: hidden;
-    transition: grid-template-rows 280ms ease-out, opacity 220ms ease, visibility 0s linear 280ms;
+    transition: opacity 220ms ease, visibility 0s linear 220ms;
   }
 
   .resource-accordion-body.is-expanded {
@@ -1820,6 +1843,12 @@ textarea { min-height: 140px; resize: vertical; }
   .resource-accordion-inner {
     min-height: 0;
     overflow: hidden;
+    transform: translateY(-6px);
+    transition: transform 220ms ease-out;
+  }
+
+  .resource-accordion-body.is-expanded .resource-accordion-inner {
+    transform: none;
   }
 
   /* Spacing lives inside the collapsing row so it animates instead of jumping */
@@ -1850,7 +1879,7 @@ textarea { min-height: 140px; resize: vertical; }
 /* =============================================================================
    REDUCED MOTION
    Respects prefers-reduced-motion for accessibility and low-powered devices.
-   Disables animations, parallax transitions, and backdrop-filter blur.
+   Disables animations and parallax transitions.
 ============================================================================= */
 
 @media (prefers-reduced-motion: reduce) {
@@ -1868,21 +1897,8 @@ textarea { min-height: 140px; resize: vertical; }
   .constellation-group { animation: none; opacity: 0.4; }
   .cosmic-scene        { animation: none; opacity: 1; }
 
-  /* Replace the header's backdrop-filter blur with a solid background
-     (blur is GPU-only and has no CPU fallback — it just disappears).
-     Cards are already solid by default. */
-  .site-header {
-    backdrop-filter: none;
-    background: rgba(8, 12, 25, 0.94);
-  }
-
   /* Scroll behaviour */
   html { scroll-behavior: auto; }
-}
-
-/* Backdrop-filter fallback for browsers that don't support it at all */
-@supports not (backdrop-filter: blur(1px)) {
-  .site-header  { background: rgba(8, 12, 25, 0.94); }
 }
 
 /* =============================================================================
@@ -1894,7 +1910,7 @@ textarea { min-height: 140px; resize: vertical; }
 /* Smooth crossfade when switching to .low-perf mode.
    Transitions are added only for properties that change — hover transitions
    on individual elements are left untouched (they're in their own rules). */
-.site-header       { transition: backdrop-filter 400ms ease, background 400ms ease, transform 220ms ease; }
+.site-header       { transition: transform 220ms ease; }
 .cosmic-sun-arc    { transition: opacity 400ms ease; }
 .cosmic-scene      { transition: opacity 400ms ease; }
 /* Planets and constellations already have shorter hover transitions —
@@ -1902,12 +1918,6 @@ textarea { min-height: 140px; resize: vertical; }
 .low-perf .cosmic-planet,
 .low-perf .constellation-group {
   transition: opacity 400ms ease !important;
-}
-
-/* Disable backdrop-filter blur — main GPU-bound offender */
-.low-perf .site-header {
-  backdrop-filter: none;
-  background: rgba(8, 12, 25, 0.94);
 }
 
 .low-perf .resource-modal-backdrop { animation: none; }
