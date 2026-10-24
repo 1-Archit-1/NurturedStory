@@ -1335,6 +1335,33 @@ textarea { min-height: 140px; resize: vertical; }
   color: rgba(200, 180, 255, 0.7);
 }
 
+/* Card header: the clickable part of each card (opens modal or expands accordion) */
+.resource-card-header {
+  width: 100%;
+  cursor: pointer;
+}
+
+.resource-card-header:focus-visible {
+  outline: 2px solid rgba(180, 140, 255, 0.5);
+  outline-offset: 4px;
+  border-radius: var(--radius-sm);
+}
+
+.resource-empty-msg {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1rem;
+  color: var(--muted);
+  font-style: italic;
+  margin: 0.5rem 0;
+}
+
+/* Default (modal) layout: accordion-only parts are hidden.
+   The links stay in the HTML; the modal JS copies them into the dialog. */
+.accordion-toggle-icon,
+.resource-accordion-body {
+  display: none;
+}
+
 
 /* =============================================================================
    RESOURCES PAGE — MODAL
@@ -1433,61 +1460,89 @@ textarea { min-height: 140px; resize: vertical; }
   margin-top: 0.6rem;
 }
 
+/* Links: each one is a soft tile — text on the left, arrow badge on the right.
+   Same markup in the accordion and the modal (the modal copies it). */
 .resource-link-list {
   list-style: none;
   margin: 0;
   padding: 0;
-}
-
-/* Each link is a plain row separated by a faint divider */
-.resource-item {
-  border-bottom: 1px solid rgba(180, 140, 255, 0.1);
-}
-
-.resource-item:last-child {
-  border-bottom: none;
+  display: grid;
+  gap: 0.55rem;
 }
 
 .resource-item a {
-  display: block;
-  padding: 0.65rem 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  min-height: 48px;
+  padding: 0.75rem 0.85rem 0.75rem 1rem;
+  border: 1px solid rgba(180, 140, 255, 0.14);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.025);
   color: inherit;
   text-decoration: none;
-  border-radius: 5px;
-  transition: color 120ms ease, background 120ms ease;
+  transition: background 160ms ease, border-color 160ms ease;
 }
 
-.resource-item a:hover {
-  background: var(--purple-bg);
+.resource-item a:hover,
+.resource-item a:focus-visible {
+  background: rgba(140, 100, 240, 0.12);
+  border-color: rgba(220, 190, 255, 0.35);
+}
+
+.resource-item a:focus-visible {
+  outline: 2px solid rgba(180, 140, 255, 0.5);
+  outline-offset: 2px;
+}
+
+.resource-item a:active { background: rgba(140, 100, 240, 0.18); }
+
+.resource-item-text {
+  flex: 1;
+  min-width: 0;
 }
 
 .resource-item-title {
   display: block;
   color: var(--text);
   font-family: "Cormorant Garamond", serif;
-  font-size: 1.1rem;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  line-height: 1.35;
-  transition: color 80ms ease;
+  font-size: 1.07rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.3;
 }
 
-.resource-item a:hover .resource-item-title { color: #e0cfff; }
-
-.resource-item-title::after {
-  content: " ↗";
-  font-size: 0.8rem;
-  opacity: 0.55;
-}
-
-.resource-item .resource-item-desc {
+.resource-item-desc {
   display: block;
-  margin: 0.2rem 0 0;
+  margin-top: 0.2rem;
   font-family: "Cormorant Garamond", serif;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
+  line-height: 1.4;
   color: var(--muted);
-  line-height: 1.45;
-  opacity: 0.8;
+}
+
+/* External-link badge (single source; no arrow in the markup) */
+.resource-item a::after {
+  content: "↗";
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 208, 96, 0.3);
+  color: var(--gold);
+  font-size: 0.9rem;
+  line-height: 1;
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.resource-item a:hover::after,
+.resource-item a:focus-visible::after {
+  transform: translate(2px, -2px);
+  background: rgba(255, 208, 96, 0.14);
+  border-color: rgba(255, 208, 96, 0.6);
+  color: var(--gold-bright);
 }
 
 
@@ -1710,14 +1765,113 @@ textarea { min-height: 140px; resize: vertical; }
   .resource-modal-card h2   { font-size: 1.05rem; margin-bottom: 0.25rem; }
   .resource-modal-card .tagline { font-size: 0.93rem; margin-bottom: 0.6rem; }
 
-  .resource-modal-items,
-  .resource-link-list { gap: 0.35rem; }
-
-  .resource-item a { padding: 0.45rem 0.65rem; }
-  .resource-item-title { font-size: 0.84rem; }
-  .resource-item-desc  { font-size: 0.88rem; }
 
   .modal-close { right: 0.75rem; top: 0.6rem; font-size: 1.25rem; width: 30px; height: 30px; }
+}
+
+/* =============================================================================
+   RESOURCES — ACCORDION LAYOUT
+   Everything for the mobile accordion lives in this one block.
+   The page JS checks whether .resource-accordion-body is displayed to pick
+   accordion vs modal, so this media query is the only switch.
+   To go back to the modal on mobile, change the query below to `not all`.
+============================================================================= */
+
+@media (max-width: 860px) {
+
+  /* --- Cards --- */
+
+  .resource-card {
+    cursor: default;
+    padding: 1rem 1.1rem;
+  }
+
+  /* No hover lift on touch: it "sticks" after a tap and shifts the open card */
+  .resource-card:hover { transform: none; }
+
+  .resource-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    text-align: left;
+  }
+
+  .resource-card-header .resource-emoji {
+    font-size: 1.9rem;
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+
+  .resource-card-titles {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* Reset the grid-card centring + min-height from .resource-title */
+  .resource-card-titles .resource-title {
+    font-size: 1.15rem;
+    text-align: left;
+    min-height: 0;
+    margin: 0 0 0.15rem;
+  }
+
+  .resource-card-titles .tagline {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: var(--muted);
+    margin: 0;
+  }
+
+  .accordion-toggle-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(180, 140, 255, 0.12);
+    border: 1px solid rgba(180, 140, 255, 0.2);
+    color: var(--muted);
+    font-size: 1.05rem;
+    flex-shrink: 0;
+    transition: transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1), background 200ms ease, color 200ms ease;
+  }
+
+  .resource-card-header[aria-expanded="true"] .accordion-toggle-icon {
+    transform: rotate(180deg);
+    color: var(--gold-bright);
+    background: rgba(255, 208, 96, 0.18);
+    border-color: rgba(255, 208, 96, 0.35);
+  }
+
+  /* --- Expand/collapse: grid 0fr -> 1fr animates to the content's height.
+     visibility keeps collapsed links out of the tab order; it flips after the
+     close animation and immediately on open. --- */
+
+  .resource-accordion-body {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    visibility: hidden;
+    transition: grid-template-rows 280ms ease-out, opacity 220ms ease, visibility 0s linear 280ms;
+  }
+
+  .resource-accordion-body.is-expanded {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0s;
+  }
+
+  .resource-accordion-inner {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  /* Spacing lives inside the collapsing row so it animates instead of jumping */
+  .resource-accordion-inner > * {
+    margin-top: 1rem;
+  }
 }
 
 /* =============================================================================

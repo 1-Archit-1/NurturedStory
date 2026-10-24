@@ -7,19 +7,61 @@
   <h1>Resources</h1>
 </section>
 
+{% comment %}
+  One markup for both layouts. Links are rendered server-side in each card.
+  - Modal layout: header opens the dialog, which shows a copy of the card's links.
+  - Accordion layout: header expands the card in place.
+  Which layout is active is decided purely in CSS (see "RESOURCES — ACCORDION
+  LAYOUT" in site.css). The JS reads the result, so no flag is needed here.
+{% endcomment %}
 <section class="resource-grid">
   {% for resource in resources %}
-    <button
-      class="section-card resource-card resource-open noSelect"
-      type="button"
-      data-resource-index="{{ forloop.counter0 }}"
+    <article
+      class="section-card resource-card noSelect"
       data-cosmic-anchor="resource-{{ resource.id }}"
-      tabindex="0"
     >
-      <div class="resource-emoji">{{ resource.emoji }}</div>
-      <h2 class="resource-title">{{ resource.title }}</h2>
-      <p class="tagline">{{ resource.tagline }}</p>
-    </button>
+      <div
+        class="resource-card-header"
+        role="button"
+        tabindex="0"
+        aria-expanded="false"
+        aria-controls="resource-body-{{ forloop.counter0 }}"
+      >
+        <div class="resource-emoji">{{ resource.emoji }}</div>
+        <div class="resource-card-titles">
+          <h2 class="resource-title">{{ resource.title }}</h2>
+          <p class="tagline">{{ resource.tagline }}</p>
+        </div>
+        <span class="accordion-toggle-icon" aria-hidden="true">▾</span>
+      </div>
+
+      {% comment %}
+        All cards start collapsed: the cosmic scene pins its height to the page at
+        load, so a page that shrinks after load would leave blank space below.
+      {% endcomment %}
+      <div class="resource-accordion-body" id="resource-body-{{ forloop.counter0 }}">
+        <div class="resource-accordion-inner">
+          {% if resource.links %}
+            <ul class="resource-link-list">
+              {% for link in resource.links %}
+                <li class="resource-item">
+                  <a href="{{ link.url }}" target="_blank" rel="noopener noreferrer">
+                    <span class="resource-item-text">
+                      <span class="resource-item-title">{{ link.title }}</span>
+                      {% if link.description %}
+                        <span class="resource-item-desc">{{ link.description }}</span>
+                      {% endif %}
+                    </span>
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="resource-empty-msg">No links available yet.</p>
+          {% endif %}
+        </div>
+      </div>
+    </article>
   {% endfor %}
 </section>
 
@@ -28,70 +70,29 @@
   <article class="section-card resource-modal-card" role="dialog" aria-modal="true" aria-labelledby="resource-modal-title">
     <button class="modal-close" type="button" id="resource-close" aria-label="Close">×</button>
     <h2 id="resource-modal-title" class="resource-title resource-modal-title"></h2>
-    <p id="resource-modal-intro" class="tagline"></p>
     <div id="resource-modal-items" class="resource-modal-items"></div>
   </article>
 </div>
-
-{{ resources|json_script:"resource-data" }}
 {% endblock %}
 
 {% block page_scripts %}
   <script>
     (() => {
-      const dataEl = document.getElementById("resource-data");
       const modal = document.getElementById("resource-modal");
-      if (!dataEl || !modal) return;
-
-      const resources = JSON.parse(dataEl.textContent);
-      const buttons = document.querySelectorAll(".resource-open");
-      const closeButton = document.getElementById("resource-close");
       const titleEl = document.getElementById("resource-modal-title");
-      const introEl = document.getElementById("resource-modal-intro");
       const itemsEl = document.getElementById("resource-modal-items");
 
-      const openModal = (resource) => {
-        titleEl.textContent = resource.title;
-        introEl.textContent = "";
-        itemsEl.innerHTML = "";
+      // CSS owns the layout choice: accordion bodies are only displayed in the
+      // accordion layout (one media query in site.css), so read that here.
+      const isAccordion = (card) =>
+        getComputedStyle(card.querySelector(".resource-accordion-body")).display !== "none";
 
-        if (resource.links && resource.links.length > 0) {
-          // Render as a list of links
-          const list = document.createElement("ul");
-          list.className = "resource-link-list";
-
-          resource.links.forEach((link) => {
-            const item = document.createElement("li");
-            item.className = "resource-item";
-
-            const anchor = document.createElement("a");
-            anchor.href = link.url;
-            anchor.target = "_blank";
-            anchor.rel = "noopener noreferrer";
-
-            const title = document.createElement("span");
-            title.className = "resource-item-title";
-            title.textContent = link.title;
-            anchor.appendChild(title);
-
-            if (link.description) {
-              const desc = document.createElement("p");
-              desc.className = "resource-item-desc";
-              desc.textContent = link.description;
-              anchor.appendChild(desc);
-            }
-
-            item.appendChild(anchor);
-            list.appendChild(item);
-          });
-
-          itemsEl.appendChild(list);
-        } else {
-          const empty = document.createElement("p");
-          empty.textContent = "No links available yet.";
-          itemsEl.appendChild(empty);
-        }
-
+      // ── Modal layout ────────────────────────────────────────────────────
+      const openModal = (card) => {
+        titleEl.textContent = card.querySelector(".resource-title").textContent;
+        itemsEl.replaceChildren(
+          ...card.querySelector(".resource-accordion-inner").cloneNode(true).children
+        );
         modal.classList.remove("hidden");
         modal.setAttribute("aria-hidden", "false");
         document.body.classList.add("modal-open");
@@ -103,27 +104,35 @@
         document.body.classList.remove("modal-open");
       };
 
-      buttons.forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const index = Number(btn.getAttribute("data-resource-index"));
-          if (Number.isNaN(index) || !resources[index]) return;
-          openModal(resources[index]);
-        });
-      });
-
-      closeButton?.addEventListener("click", closeModal);
-
+      document.getElementById("resource-close").addEventListener("click", closeModal);
       modal.addEventListener("click", (event) => {
-        const target = event.target;
-        if (target instanceof HTMLElement && target.dataset.closeModal === "true") {
+        if (event.target instanceof HTMLElement && event.target.dataset.closeModal === "true") {
           closeModal();
         }
       });
-
       document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape" && !modal.classList.contains("hidden")) {
-          closeModal();
-        }
+        if (event.key === "Escape" && !modal.classList.contains("hidden")) closeModal();
+      });
+
+      // ── Accordion layout + wiring ───────────────────────────────────────
+      document.querySelectorAll(".resource-card-header").forEach((header) => {
+        const card = header.closest(".resource-card");
+        const activate = () => {
+          if (!isAccordion(card)) {
+            openModal(card);
+            return;
+          }
+          const open = header.getAttribute("aria-expanded") !== "true";
+          card.querySelector(".resource-accordion-body").classList.toggle("is-expanded", open);
+          header.setAttribute("aria-expanded", String(open));
+        };
+        header.addEventListener("click", activate);
+        header.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            activate();
+          }
+        });
       });
     })();
   </script>
